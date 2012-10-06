@@ -8,13 +8,31 @@ public class TouchButton {
   float yPosition = 0;
   boolean isVisible = true;
   private PApplet parent = null;
-  public TouchButton(PApplet parent,String content, float width, float height, float xPos, float yPos){
+  int foregroundColor = 100;
+  int backgroundColor = 100;
+  int textColor = 0;
+  PFont font;
+  
+  public void setForegroundColor(final int colorParam) {
+    foregroundColor = colorParam;
+  }
+  
+  public void setBackgroundColor(final int colorParam) {
+    backgroundColor = colorParam;
+  }
+  
+  public void setTextColor(final int colorParam) {
+    textColor = colorParam;  
+  }
+  
+  public TouchButton(PApplet parent,String content, float width, float height, float xPos, float yPos, PFont paramFont){
     this.parent = parent;
     this.content = content;
     Width = width;
     Height = height;
     xPosition = xPos;
     yPosition = yPos;
+    font = paramFont;
   }
   public boolean isVisible(){
     return isVisible;
@@ -28,13 +46,13 @@ public class TouchButton {
   
   public void draw(){
     if(isVisible){
-      parent.fill(150);
+      parent.fill(backgroundColor);
       parent.rectMode(parent.CORNERS);
       parent.rect(xPosition, yPosition, xPosition+Width, yPosition+Height);
-      parent.fill(0);
+      parent.textFont(font);
+      parent.fill(textColor);
       parent.textAlign(parent.CENTER);
       parent.text(content, xPosition+(Width/2), (float) (yPosition+(Height/2)+2));
-      parent.textAlign(parent.LEFT);
     }    
   }
   
