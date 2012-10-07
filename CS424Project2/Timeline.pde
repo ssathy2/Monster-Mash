@@ -13,7 +13,7 @@ import controlP5.*;
 class Timeline {
   PApplet parent;
   Range yearsSlider;
-  
+    
   int sliderX, sliderY;
   int sliderHeight, sliderWidth;
   int yearsSliderHandleSize;
@@ -42,7 +42,7 @@ class Timeline {
     yearsSliderHandleSize = 10 * scaleFactor;
     
     sliderX = floor(plotX1);
-    sliderY = floor(plotY1) + timelineHeightParam - (sliderHeight);
+    sliderY = floor(plotY1) + timelineHeightParam - (10*scaleFactor);
     
     timelineHeight = timelineHeightParam ;
     timelineWidth = timelineWidthParam;
@@ -73,6 +73,21 @@ class Timeline {
                     ;
   }
   
+  public void drawYearLabels() {
+    // temp interval var
+    int yearInterval = 10;
+    fill(#FFFFFF);
+    textSize(8 * scaleFactor);
+    textAlign(CENTER, TOP);
+ 
+    for (int years = listener.sliderYearsMin;years <= listener.sliderYearsMax; years++) {
+      if (years % yearInterval == 0) {
+        float x = map(years, listener.sliderYearsMin, listener.sliderYearsMax, plotX1, plotX2);
+        text(years, x, plotY2 + 10);
+      }
+    }
+  }
+  
   public void draw() {
     if(isPlotVisible) {
       parent.fill(#DFDFDF);
@@ -81,6 +96,7 @@ class Timeline {
       parent.rect(plotX1, plotY1, plotX2, plotY2);
       parent.stroke(#EDFC47);
       parent.strokeWeight(2);
+      drawYearLabels();
     }
   }
   
@@ -90,8 +106,8 @@ class Timeline {
 }
 
 class RangeControlListener implements ControlListener {
-  int sliderYearsMin;
-  int sliderYearsMax;
+  int sliderYearsMin = 1890;
+  int sliderYearsMax = 2012;
   
   public void controlEvent(ControlEvent theEvent) {
     if(theEvent.isFrom("yearsRange")) {

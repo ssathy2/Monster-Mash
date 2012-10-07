@@ -17,7 +17,7 @@ SearchableListbox moviesBox;
 Timeline timeLine;
 
 // String arr of Items --> Testing for now
-String test[] = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"};
+String test[] = {"United States", "France", "United Kingdom", "Japan"};
 
 // Touchbuttons
 TouchButton helpButton;
@@ -82,7 +82,7 @@ void setup(){
   countriesBoxWidth = listBoxItemWidth;
   countriesBoxHeight = 220 * scaleFactor;
   
-  helpButtonX = 5;
+  helpButtonX = (width / 2) + 20 * scaleFactor;
   helpButtonY = height - (15 * scaleFactor);
   helpButtonWidth = 25 * scaleFactor; 
   helpButtonHeight = 15 * scaleFactor;
@@ -91,7 +91,7 @@ void setup(){
   creditsButtonHeight = helpButtonHeight;
   creditsButtonWidth = 30 * scaleFactor;
 
-  timelineX = 5 * scaleFactor;
+  timelineX = 10 * scaleFactor;
   timelineY = 5;
   timelineWidth = width / 2; 
   timelineHeight = height - (helpButtonHeight) - (10 * scaleFactor);
@@ -108,7 +108,12 @@ void setup(){
 }
 
 boolean sketchFullScreen() {
-  return true;  
+  if(displayOnWall) {
+    return false;
+  }
+  else {
+    return true;  
+  }
 }
 
 void draw() {
@@ -122,12 +127,17 @@ void draw() {
   // draw the help and credits buttons
   helpButton.draw();
   creditsButton.draw(); 
+  
+  // draw genre, countries, and monsters string labels
+  textFont(font);
+  textSize(8 * scaleFactor);
+  fill(#DFDFDF);
+  text("Genres", (genreCheckboxX + (genreCheckboxWidth/2)), genreCheckboxY - (5*scaleFactor));
+  text("Monsters", (keywordCheckboxX + (keywordCheckboxWidth/2)), keywordCheckboxY - (5*scaleFactor));
+  text("Countries of Origin", (countriesBoxX + (countriesBoxWidth / 2)), countriesBoxY - (5 * scaleFactor));
 }
 
 void initGenreCheckbox() {
-  textFont(font);
-  fill(#DFDFDF);
-  text("Genres", genreCheckboxX + (0.5*genreCheckboxWidth), genreCheckboxY - (5*scaleFactor));
   genreCheckbox = cp5.addCheckBox("genreCheckbox")
                      .setPosition(genreCheckboxX, genreCheckboxY)
                      .setSize(genreCheckboxWidth, genreCheckboxHeight)
@@ -142,9 +152,6 @@ void initGenreCheckbox() {
 }
 
 void initKeywordCheckbox() {
-  textFont(font);
-  fill(#DFDFDF);
-  text("Monsters", keywordCheckboxX + (0.5*genreCheckboxWidth), genreCheckboxY - (5*scaleFactor));
   keywordCheckbox = cp5.addCheckBox("keywordCheckbox")
                        .setPosition(keywordCheckboxX, keywordCheckboxY)
                        .setSize(keywordCheckboxWidth, keywordCheckboxHeight)
