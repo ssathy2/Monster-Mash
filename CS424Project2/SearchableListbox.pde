@@ -6,7 +6,9 @@ import controlP5.*;
   auto complete and filtering options are also another feature of this
 */
 class SearchableListbox {
-  String currentTextInBox;
+  String currentTextInBox = "";
+ 
+  private String currentSelectedItem = ""; 
   
   int listboxxPos, listboxyPos;
   int listboxHeight, listboxWidth;
@@ -69,14 +71,21 @@ class SearchableListbox {
     }
     itemsBox.update();
   }
- 
-  
-}
 
+  public String getLastSelectedItem() {
+     return currentSelectedItem;
+  }
+  
   class MyControlListener implements ControlListener {
-  int col;
+    int currentIndex;
     public void controlEvent(ControlEvent theEvent) {
-      println("asdas");
+      if(theEvent.isFrom("itemsBox")) {
+         currentIndex = (int)theEvent.group().value();
+         inputBox.setText(listboxItems[currentIndex]);
+         currentSelectedItem = listboxItems[currentIndex];
+      }
     }
 
-  }
+  }  
+}
+
