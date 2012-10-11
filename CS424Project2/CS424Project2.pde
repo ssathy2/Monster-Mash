@@ -1,9 +1,6 @@
 import processing.net.*;
 import controlP5.*;
 
-// dummy var to force range sliders to use integers
-int yearsRange;
-
 // Primary controlP5 object
 ControlP5 cp5;
 
@@ -14,10 +11,14 @@ CheckBox genreCheckbox;
 CheckBox keywordCheckbox;
 SearchableListbox countriesBox;
 SearchableListbox moviesBox;
+RemovableListbox removableCountriesBox;
 Timeline timeLine;
 
 // String arr of Items --> Testing for now
-String test[] = {"United States", "France", "United Kingdom", "Japan"};
+String test[] = {"United States", "France", "United Kingdom", "Japan", "Germany", "Italy", "Russia", "China", "Canada", "Spain", "India"};
+
+// Arraylists containing the genres and keywords...this'll be updated with the current genres and current monsters that are selected
+String genres[] = {"Horror", "Comedy", "Musical", "Drama"};
 
 // Touchbuttons
 TouchButton helpButton;
@@ -33,6 +34,9 @@ int countriesBoxWidth, countriesBoxHeight;
 int moviesBoxX, moviesBoxY;
 int moviesBoxWidth, moviesBoxHeight;
 
+int removableCountriesBoxX, removableCountriesBoxY;
+int removableCountriesBoxHeight, removableCountriesBoxWidth;
+
 int listBoxItemHeight, listBoxItemWidth;
 
 int helpButtonX, helpButtonY;
@@ -44,6 +48,12 @@ int timelineX, timelineY;
 int timelineWidth, timelineHeight;
 
 int scaleFactor;
+
+/*
+  Options:
+  - decide whether we're displaying on the wall
+  - decide whether we're running on a mbp (can't do P3D and 8160 by 2304 for some reason)
+*/
 boolean displayOnWall = false;
 
 int textColor = color(#DFDFDF);
@@ -66,7 +76,7 @@ void setup(){
   
   // initialize the x,y, sizes of the ui elements
   genreCheckboxX = width - (scaleFactor * 250);
-  genreCheckboxY = scaleFactor * 20;
+  genreCheckboxY = scaleFactor * 40;
   genreCheckboxHeight = 50;
   genreCheckboxWidth = 50;
   keywordCheckboxX = genreCheckboxX;
@@ -82,6 +92,11 @@ void setup(){
   countriesBoxWidth = listBoxItemWidth;
   countriesBoxHeight = 220 * scaleFactor;
   
+  removableCountriesBoxX = countriesBoxX - countriesBoxWidth - (10 * scaleFactor);
+  removableCountriesBoxY = countriesBoxY;
+  removableCountriesBoxHeight = countriesBoxHeight;
+  removableCountriesBoxWidth = countriesBoxWidth;
+
   helpButtonX = (width / 2) + 20 * scaleFactor;
   helpButtonY = height - (15 * scaleFactor);
   helpButtonWidth = 25 * scaleFactor; 
@@ -91,7 +106,7 @@ void setup(){
   creditsButtonHeight = helpButtonHeight;
   creditsButtonWidth = 30 * scaleFactor;
 
-  timelineX = 10 * scaleFactor;
+  timelineX = 20 * scaleFactor;
   timelineY = 5;
   timelineWidth = width / 2; 
   timelineHeight = height - (helpButtonHeight) - (10 * scaleFactor);
@@ -100,6 +115,7 @@ void setup(){
   initGenreCheckbox();
   initKeywordCheckbox();
   initCountriesBox();
+  initRemovableCountriesBox();
   //initMoviesBox();
   initTimeLine();
   initHelpButton(font);
@@ -128,6 +144,11 @@ void draw() {
   helpButton.draw();
   creditsButton.draw(); 
   
+  // draw removable countries box
+  // grab the last selected country from the countries box and add it to the countries display
+  removableCountriesBox.addItemToRemovableListBox(countriesBox.getLastSelectedItem());
+  removableCountriesBox.draw();
+  
   // draw genre, countries, and monsters string labels
   textFont(font);
   textSize(8 * scaleFactor);
@@ -148,6 +169,7 @@ void initGenreCheckbox() {
                      .setSpacingColumn(scaleFactor * 40)
                      .setItemsPerRow(4)
                      .toUpperCase(false)
+                     .activateAll()
                      ;
 }
 
@@ -162,6 +184,7 @@ void initKeywordCheckbox() {
                        .setSpacingColumn(scaleFactor * 40)
                        .setSpacingRow(scaleFactor * 10)
                        .setItemsPerRow(2)
+                       .activateAll()
                        .toUpperCase(false)
                        ;
 }
@@ -179,11 +202,15 @@ void keyReleased() {
 }
 
 void initTimeLine() {
-  timeLine = new Timeline(this, cp5, timelineX, timelineY, timelineWidth, timelineHeight);
+  timeLine = new Timeline(this, cp5, timelineX, timelineY, timelineWidth, timelineHeight, "slider1");
 }
 
 void initMoviesBox() {
   
+}
+
+void initRemovableCountriesBox() {
+    removableCountriesBox = new RemovableListbox(this, removableCountriesBoxX, removableCountriesBoxY, removableCountriesBoxHeight, removableCountriesBoxWidth);
 }
 
 void initHelpButton(PFont font) {
@@ -196,5 +223,4 @@ void initCreditsButton(PFont font) {
   creditsButton = new TouchButton(this, "Credits",(float)creditsButtonWidth, (float)creditsButtonHeight, (float)creditsButtonX, (float)creditsButtonY, font); 
   creditsButton.setBackgroundColor(color(#DFDFDF));
   creditsButton.setTextColor(color(#2C2228));
-
 }
