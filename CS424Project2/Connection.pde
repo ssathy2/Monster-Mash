@@ -15,7 +15,7 @@ class Connection {
       String genreString = genreList[0];
       if ( msql.connect() )
       {
-        msql.query("select movie.titleMovie from movie,genre where movie.idMovie = genre.idMovie and movie.idMovie in (select distinct(idMovie) from genre where genreMovie = '"+genreString+"' ) and movie.yearMovie in ('"+yearStart+"','"+yearEnd+"') order by genre.idMovie limit 0,10000");
+        msql.query("select movie.titleMovie from movie,genre where movie.idMovie = genre.idMovie and movie.idMovie in (select distinct(idMovie) from genre where genreMovie = '"+genreString+"' ) and movie.yearMovie between '"+yearStart+"' and '"+yearEnd+"' order by genre.idMovie limit 0,1000000");
         while (msql.next ()) {
           a.add(msql.getString("movie.titleMovie"));
         }
