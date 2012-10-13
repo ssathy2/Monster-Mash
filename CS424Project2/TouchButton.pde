@@ -48,10 +48,11 @@ public class TouchButton {
     if(isVisible){
       parent.fill(backgroundColor);
       parent.rectMode(parent.CORNERS);
+      noStroke();
       parent.rect(xPosition, yPosition, xPosition+Width, yPosition+Height);
       parent.textFont(font);
       parent.fill(textColor);
-      parent.textAlign(parent.CENTER);
+      parent.textAlign(parent.CENTER, parent.CENTER);
       parent.text(content, xPosition+(Width/2), (float) (yPosition+(Height/2)+2));
     }    
   }
@@ -66,6 +67,10 @@ public class TouchButton {
   }
   public float getHeight(){
     return Height;
+  }
+  
+  public String getContent(){
+    return content;
   }
 }
 
