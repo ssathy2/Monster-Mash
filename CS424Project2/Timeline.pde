@@ -10,6 +10,8 @@ import controlP5.*;
  */
 
 class Timeline {
+  //FloatTable data;
+  
   PApplet parent;
   Range yearsSlider;
     
@@ -18,7 +20,8 @@ class Timeline {
   int yearsSliderHandleSize;
   
   String rangeName;
-  
+  String title; 
+   
   float plotX1, plotY1;
   float plotX2, plotY2;
  
@@ -26,9 +29,11 @@ class Timeline {
   
   RangeControlListener listener;
   
-  int[] lineColors = new int[6];
-  
   boolean isPlotVisible = true;
+  boolean showComedy = true;
+  boolean showHorror = true;
+  boolean showMusical = true;
+  boolean showDrama = true;
   
   public Timeline(PApplet p, ControlP5 p5, int timelineX, int timelineY, int timelineWidthParam, int timelineHeightParam, String sliderName) {
     // use this object to grab latest sliderYearMax and slideryearMin values
@@ -36,29 +41,21 @@ class Timeline {
     
     parent = p;
     plotX1 = (float)timelineX;
-    plotY1 = (float)timelineY;
+    plotY1 = (float)(timelineY + (40 * scaleFactor));
     
     sliderHeight = 25 * scaleFactor;
     sliderWidth = timelineWidthParam;
     yearsSliderHandleSize = 10 * scaleFactor;
     
     sliderX = floor(plotX1);
-    sliderY = floor(plotY1) + timelineHeightParam - (10*scaleFactor);
+    sliderY = floor(plotY1) + timelineHeightParam - (55*scaleFactor);
     
     timelineHeight = timelineHeightParam ;
     timelineWidth = timelineWidthParam;
     plotX2 = (float)(plotX1 + timelineWidth);
     
     // the 10*scaleFactor is to fit in the years labels
-    plotY2 = (float)(plotY1 + timelineHeight) - sliderHeight - (10 * scaleFactor);
-    
-    // Sample line colors for now... 
-    lineColors[0] = color(#00FFFE);
-    lineColors[1] = color(#D10010);
-    lineColors[2] = color(#5B8749);
-    lineColors[3] = color(#FFFD56);
-    lineColors[4] = color(#FF9735);
-    lineColors[5] = color(#237BDD);
+    plotY2 = (float)(plotY1 + timelineHeight) - sliderHeight - (60 * scaleFactor);
     
     rangeName = sliderName;
     
@@ -77,21 +74,31 @@ class Timeline {
                     .snapToTickMarks(true)
                     .addListener(listener)
                     ;
+      title = "BLAH BLAH TEST TITLE";
   }
   
   public void drawYearLabels() {
     // temp interval var
     int yearInterval = 10;
-    fill(#FFFFFF);
+    int minorYearInterval = 2;
+    
+    fill(#DFDFDF);
     textSize(8 * scaleFactor);
     textAlign(CENTER, TOP);
  
+    stroke(#DFDFDF);
+    strokeWeight(1);
+    
     for (int years = listener.sliderYearsMin;years <= listener.sliderYearsMax; years++) {
+      float x = map(years, listener.sliderYearsMin, listener.sliderYearsMax, plotX1, plotX2);
       if (years % yearInterval == 0) {
-        float x = map(years, listener.sliderYearsMin, listener.sliderYearsMax, plotX1, plotX2);
         text(years, x, plotY2 + (10 * scaleFactor));
+        line(x, plotY2, x, plotY2 + (10*scaleFactor));
       }
-    }
+      else if(years % minorYearInterval == 0) {
+        line(x, plotY2, x, plotY2 + (5*scaleFactor));
+      }
+    }  
   }
   
   public void drawUnitLabels(int dataMin, int dataMax, int dataInterval) {
@@ -101,7 +108,7 @@ class Timeline {
     textSize(8 * scaleFactor);
     textAlign(RIGHT);
   
-    stroke(128);
+    stroke(#DFDFDF);
     strokeWeight(1);
     
     for(int i = dataMin; i <= dataMax; i = i + dataInterval) {
@@ -123,20 +130,88 @@ class Timeline {
   public void drawLines() {
     // TODO: Need some way to draw the lines for the time-line
     //       Need some color coding scheme...use line-color array
+    stroke(#EDFC47);
+    strokeWeight(2);
+    //drawDataLine(); 
+  }
+  
+  private int getMaximum(Integer[] arr) {
+    Arrays.sort(arr);
+    return arr[arr.length];  
+  }
+  
+  private void drawDataLine() {
+    showComedy = showHorror = showMusical = showDrama = false;
+    int maxVal = 0 ;
+    int[] displayArr = new int[(2012-1890)];
+    
+    for(int i = 0; i < selectedGenres.size(); i++) {
+      if(selectedGenres.get(i).equals("Horror")) {
+        showHorror = true;
+        maxVal += getMaximum(Arrays.copyOf(horrorCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
+        for(int j = 1890; j <= 2012; j++) {
+          displayArr[j-1890] += horrorCount.get(j);
+        }
+      }
+      else if(selectedGenres.get(i).equals("Comedy")) {
+        showComedy = true;         
+        maxVal += getMaximum(Arrays.copyOf(comedyCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
+        for(int j = 1890; j <= 2012; j++) {
+          displayArr[j-1890] += comedyCount.get(j);
+        }
+      }
+      else if(selectedGenres.get(i).equals("Musical")) {
+        showMusical = true;
+        maxVal += getMaximum(Arrays.copyOf(musicalCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
+        for(int j = 1890; j <= 2012; j++) {
+          displayArr[j-1890] += musicalCount.get(j);
+        }
+      }
+      else if(selectedGenres.get(i).equals("Drama")){
+        showDrama = true;  
+        maxVal += getMaximum(Arrays.copyOf(dramaCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
+        for(int j = 1890; j <= 2012; j++) {
+          displayArr[j-1890] += dramaCount.get(j);
+        }
+      }
+    }
+    
+    beginShape();
+    
+    int yearsMin = listener.sliderYearsMin;
+    int yearsMax = listener.sliderYearsMax;
+    
+    for (int i = 0; i < displayArr.length; i++) {
+      float value = (float)displayArr[i];
+      float x = map(value, yearsMin, yearsMax, plotX1, plotX2);
+      float y = map(value, 0, maxVal, plotY2, plotY1);
+      vertex(x,y);
+    }
+    endShape();
+
   }
   
   public void draw() {
     if(isPlotVisible) {
       // TODO: Should timeline have same bg color as regular app?
-      parent.fill(#232323);
+      parent.fill(backgroundColor);
       parent.rectMode(CORNERS);
       parent.noStroke();
       parent.rect(plotX1, plotY1, plotX2, plotY2);
 
       drawYearLabels();
-      drawUnitLabels(0, 100, 10);
-      drawLines();
+      drawUnitLabels(0, 50, 10);
+      //drawLines();
+      drawTitle();
     }
+  }
+  
+  public void drawTitle() {
+    fill(#DFDFDF);
+    textSize(8 * scaleFactor);
+    textAlign(CENTER);
+    
+    text(title, (plotX1 + timelineWidth / 2), (plotY1 - ((40 * scaleFactor) / 2)));
   }
   
   public void shouldShowPlot(boolean showPlot) {
