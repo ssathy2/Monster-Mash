@@ -35,6 +35,15 @@ class Timeline {
   boolean showMusical = true;
   boolean showDrama = true;
   
+     
+  // Data
+  HashMap<Integer, Integer> comedyCount;
+  HashMap<Integer, Integer> horrorCount;  
+  HashMap<Integer, Integer> musicalCount;
+  HashMap<Integer, Integer> dramaCount;
+
+  HashMap<String, HashMap<Integer, Integer>> cachedCountries;
+  
   public Timeline(PApplet p, ControlP5 p5, int timelineX, int timelineY, int timelineWidthParam, int timelineHeightParam, String sliderName) {
     // use this object to grab latest sliderYearMax and slideryearMin values
     listener = new RangeControlListener();
@@ -75,8 +84,25 @@ class Timeline {
                     .addListener(listener)
                     ;
       title = "BLAH BLAH TEST TITLE";
+      cachedCountries = new HashMap<String, HashMap<Integer, Integer>>();
+      loadData();  
   }
   
+  public void loadData() {
+    println("Loading comedy movies per year...");
+    comedyCount = moviesDB.getNumberMoviesPerYear("Comedy", 1890, 2012); 
+    println("Comedy movies per year loaded.");  
+    println("Loading horror movies per year...");
+    horrorCount = moviesDB.getNumberMoviesPerYear("Horror", 1890, 2012); 
+    println("Horror movies per year loaded.");  
+    println("Loading muscial movies per year...");
+    musicalCount = moviesDB.getNumberMoviesPerYear("Musical", 1890, 2012); 
+    println("Musical movies per year loaded.");  
+    println("Loading drama movies per year...");
+    dramaCount = moviesDB.getNumberMoviesPerYear("Drama", 1890, 2012); 
+    println("drama movies per year loaded.");  
+  } 
+
   public void drawYearLabels() {
     // temp interval var
     int yearInterval = 10;
@@ -130,66 +156,158 @@ class Timeline {
   public void drawLines() {
     // TODO: Need some way to draw the lines for the time-line
     //       Need some color coding scheme...use line-color array
-    stroke(#EDFC47);
+    if(selectedCountries.isEmpty()) {
+      stroke(#EDFC47);
+      strokeWeight(2);
+      drawDataLine(); 
+    }
+    else {
+      drawCountryLines();
+      //drawUnitLabels(0, 
+    }
+  }
+  
+  public void drawCountryLines() {
+    for(int i = 0; i < selectedCountries.size(); i++) {
+      String country = selectedCountries.get(i);
+      if(cachedCountries.containsKey(country)) {
+        drawColoredLine(lineColors[i], cachedCountries.get(country));   
+      } 
+      else {
+        println("Getting movies for " + country + "...");
+        HashMap<Integer, Integer> moviesCountry = moviesDB.getNumberMoviesPerYear(Arrays.copyOf(selectedGenres.toArray(), selectedGenres.toArray().length, String[].class), country, 1890, 2012);
+        println("Movies loaded for " + country);
+        cachedCountries.put(country, moviesCountry);
+        drawColoredLine(lineColors[i], moviesCountry);
+      }  
+    } 
+  }
+  
+  public void drawColoredLine(int lineColor, HashMap<Integer, Integer> movies) {
+    stroke(lineColor);
     strokeWeight(2);
-    //drawDataLine(); 
-  }
-  
-  private int getMaximum(Integer[] arr) {
-    Arrays.sort(arr);
-    return arr[arr.length];  
-  }
-  
-  private void drawDataLine() {
-    showComedy = showHorror = showMusical = showDrama = false;
-    int maxVal = 0 ;
     int[] displayArr = new int[(2012-1890)];
     
-    for(int i = 0; i < selectedGenres.size(); i++) {
-      if(selectedGenres.get(i).equals("Horror")) {
-        showHorror = true;
-        maxVal += getMaximum(Arrays.copyOf(horrorCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
-        for(int j = 1890; j <= 2012; j++) {
-          displayArr[j-1890] += horrorCount.get(j);
+    for(int j = 1890; j <= 2012; j++) {
+      if(j == 2012) {
+        if(movies.get(j) == null){
+          displayArr[j-1890-1] += 0;
+        }else { 
+          displayArr[j - 1890 - 1] += movies.get(j);  
         }
-      }
-      else if(selectedGenres.get(i).equals("Comedy")) {
-        showComedy = true;         
-        maxVal += getMaximum(Arrays.copyOf(comedyCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
-        for(int j = 1890; j <= 2012; j++) {
-          displayArr[j-1890] += comedyCount.get(j);
-        }
-      }
-      else if(selectedGenres.get(i).equals("Musical")) {
-        showMusical = true;
-        maxVal += getMaximum(Arrays.copyOf(musicalCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
-        for(int j = 1890; j <= 2012; j++) {
-          displayArr[j-1890] += musicalCount.get(j);
-        }
-      }
-      else if(selectedGenres.get(i).equals("Drama")){
-        showDrama = true;  
-        maxVal += getMaximum(Arrays.copyOf(dramaCount.values().toArray(), comedyCount.values().toArray().length, Integer[].class));     
-        for(int j = 1890; j <= 2012; j++) {
-          displayArr[j-1890] += dramaCount.get(j);
+      } else {
+        if(movies.get(j) == null) {
+          displayArr[j-1890] += 0;
+        } else {
+          displayArr[j - 1890] += movies.get(j);
         }
       }
     }
     
+    int yearsMin = listener.sliderYearsMin;
+    int yearsMax = listener.sliderYearsMax;
+    int maxVal = getMaxValue(displayArr);
+    
+    noFill();
     beginShape();
+    for (int i = yearsMin; i <= yearsMax ; i++) {
+      float value = (float) ((i == 2012)?displayArr[i - 1890 - 1]:displayArr[i - 1890]);
+      float x = map(i, yearsMin, yearsMax, plotX1, plotX2);
+      float y = map(value, 0, maxVal, plotY2, plotY1);
+      vertex(x,y);
+    }
+    endShape();
+  }
+  
+  private void drawDataLine() {
+    showComedy = showHorror = showMusical = showDrama = false;
+    int[] displayArr = new int[(2012-1890)];
+    
+      for(int i = 0; i < selectedGenres.size(); i++) {
+        if(selectedGenres.get(i).equals("Horror")) {
+          showHorror = true;
+          for(int j = 1890; j <= 2012; j++) {
+            if(horrorCount.get(j) == null) displayArr[j-1890] += 0;
+            else {
+              if(j == 2012) {
+                displayArr[j - 1890 - 1] += horrorCount.get(j);  
+              }
+              else {
+                displayArr[j - 1890] += horrorCount.get(j);
+              }
+            }
+          }
+        }
+        else if(selectedGenres.get(i).equals("Comedy")) {
+          showComedy = true;      
+          for(int j = 1890; j <= 2012; j++) {
+            if(comedyCount.get(j) == null) displayArr[j-1890] += 0;
+            else {
+              if(j == 2012) {
+                displayArr[j - 1890 - 1] += comedyCount.get(j);  
+              }
+              else {
+                displayArr[j - 1890] += comedyCount.get(j);
+              }
+            }
+          }
+        }
+        else if(selectedGenres.get(i).equals("Musical")) {
+          showMusical = true;
+          for(int j = 1890; j <= 2012; j++) {
+            if(musicalCount.get(j) == null) displayArr[j-1890] += 0;
+            else {
+              if(j == 2012) {
+                displayArr[j - 1890 - 1] += musicalCount.get(j);  
+              }
+              else {
+                displayArr[j - 1890] += musicalCount.get(j);
+              }
+            }
+        }
+        }
+        else if(selectedGenres.get(i).equals("Drama")){
+          showDrama = true;  
+          for(int j = 1890; j <= 2012; j++) {
+            if(dramaCount.get(j) == null) displayArr[j-1890] += 0;
+            else {
+              if(j == 2012) {
+                displayArr[j - 1890 - 1] += dramaCount.get(j);  
+              }
+              else {
+                displayArr[j - 1890] += dramaCount.get(j);
+              }
+            }
+        }
+      }
+    }
     
     int yearsMin = listener.sliderYearsMin;
     int yearsMax = listener.sliderYearsMax;
+    int maxVal = getMaxValue(displayArr);
     
-    for (int i = 0; i < displayArr.length; i++) {
-      float value = (float)displayArr[i];
-      float x = map(value, yearsMin, yearsMax, plotX1, plotX2);
+    noFill();
+    beginShape();
+    for (int i = yearsMin; i <= yearsMax ; i++) {
+      float value = (float) ((i == 2012)?displayArr[i - 1890 - 1]:displayArr[i - 1890]);
+      float x = map(i, yearsMin, yearsMax, plotX1, plotX2);
       float y = map(value, 0, maxVal, plotY2, plotY1);
       vertex(x,y);
     }
     endShape();
 
+    drawUnitLabels(0, maxVal, 1000);
   }
+  
+  public int getMaxValue(int[] numbers){  
+  int maxValue = numbers[0];  
+    for(int i=1;i < numbers.length;i++){  
+      if(numbers[i] > maxValue){  
+        maxValue = numbers[i];  
+      }  
+    }  
+    return maxValue;  
+  }  
   
   public void draw() {
     if(isPlotVisible) {
@@ -200,8 +318,7 @@ class Timeline {
       parent.rect(plotX1, plotY1, plotX2, plotY2);
 
       drawYearLabels();
-      drawUnitLabels(0, 50, 10);
-      //drawLines();
+      drawLines();
       drawTitle();
     }
   }
@@ -217,7 +334,6 @@ class Timeline {
   public void shouldShowPlot(boolean showPlot) {
     isPlotVisible = showPlot;
   }
-  
   
   class RangeControlListener implements ControlListener {
     int sliderYearsMin = 1890;

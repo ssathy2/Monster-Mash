@@ -23,8 +23,11 @@ class SearchableListbox {
   
   String[] listboxItems;
   
+  String name;
+  boolean secret; 
+  
   // init all of the class global vars
-  public SearchableListbox(ControlP5 p5, int xPos, int yPos, int boxHeight, int boxWidth, int searchBoxHeight, int searchBoxWidth, String[] items) {
+  public SearchableListbox(ControlP5 p5, int xPos, int yPos, int boxHeight, int boxWidth, int searchBoxHeight, int searchBoxWidth, String[] items, String n, boolean s) {
      searchboxxPos = xPos;
      searchboxyPos = yPos;
      searchboxHeight = searchBoxHeight;
@@ -40,7 +43,7 @@ class SearchableListbox {
      listener = new MyControlListener();
      
      // add the itemsbox and the input box
-     itemsBox = p5.addListBox("itemsBox")
+     itemsBox = p5.addListBox(n)
                   .setLabel("")
                   .disableCollapse()
                   .setPosition(listboxxPos, listboxyPos)
@@ -50,11 +53,13 @@ class SearchableListbox {
                   .addListener(listener)
                   .addItems(listboxItems);
                   
-     inputBox = p5.addTextfield("inputBox")
+     inputBox = p5.addTextfield(n+"inputBox")
                   .setPosition(searchboxxPos, searchboxyPos)
                   .setSize(searchboxWidth, searchboxHeight)
                   .setLabel("")
-                  ;   
+                  ;  
+     name = n;
+     secret = s;     
   }
   
   public boolean isInFocus() {
@@ -79,14 +84,16 @@ class SearchableListbox {
   class MyControlListener implements ControlListener {
     int currentIndex;
     public void controlEvent(ControlEvent theEvent) {
-      if(theEvent.isFrom("itemsBox")) {
+      if(theEvent.isFrom(name)) {
          currentIndex = (int)theEvent.group().value();
          inputBox.setText(listboxItems[currentIndex]);
          
          // draw removable countries box
          // This is fucking hacky as hell but for some reason, putting this call inside the draw function of the main app is
          // adding it twice...For now this is meh but due to time constraints it works and yea, throw it in and worry later      
-         removableCountriesBox.addItemToRemovableListBox(listboxItems[currentIndex]);
+         if(secret) {
+           removableCountriesBox.addItemToRemovableListBox(listboxItems[currentIndex]);
+         }
       }
     }
   }  

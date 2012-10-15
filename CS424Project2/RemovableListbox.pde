@@ -90,7 +90,7 @@ class RemovableListbox {
     }
   }
   
-  public ArrayList<String> getCurrentCountriesSelected () {
+  public ArrayList<String> getCurrentItemsSelected () {
    return literalItems; 
   }
 

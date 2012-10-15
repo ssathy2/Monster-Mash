@@ -1,5 +1,13 @@
 import processing.net.*;
 import controlP5.*;
+import java.util.*;
+import hypermedia.net.*;
+import omicronAPI.*;
+
+OmicronAPI omicronManager;
+TouchListener touchListener;
+
+PApplet applet;
 
 // Primary controlP5 object
 ControlP5 cp5;
@@ -22,14 +30,11 @@ ArrayList<String> selectedCountries;
 ArrayList<String> selectedGenres;
 ArrayList<String> selectedKeywords;
 
-// Data
-HashMap<Integer, Integer> comedyCount;
-HashMap<Integer, Integer> horrorCount;
-HashMap<Integer, Integer> musicalCount;
-HashMap<Integer, Integer> dramaCount;
+// String arr of all countries
+String listOfAllCountries[];
 
-// String arr of Items --> Testing for now
-String test[] = {"United States", "France", "United Kingdom", "Japan", "Germany", "Italy", "Russia", "China", "Canada", "Spain", "India"};
+//list of all movies
+String listOfAllMovies[];
 
 // Sample line colors for now... 
 int[] lineColors; 
@@ -77,9 +82,23 @@ boolean displayMBP = true;
 int textColor = color(#DFDFDF);
 int backgroundColor;
 
+public void init() {
+  super.init();
+  omicronManager = new OmicronAPI(this);
+  //omicronManager.setFullscreen(true);
+}
+
 void setup(){
-  backgroundColor = color(#232323);
+  applet = this;
+  touchListener = new TouchListener();
+  omicronManager.setTouchListener(touchListener);
   
+  if(displayOnWall) {
+    omicronManager.ConnectToTracker(7001, 7340, "131.193.77.159");
+  }
+  
+  backgroundColor = color(#232323);
+   
   // set size and scalefactor
   if(displayOnWall) {
     if(!displayMBP) {
@@ -123,16 +142,6 @@ void setup(){
   
   listBoxItemHeight = 18 * scaleFactor;
   listBoxItemWidth = 100 * scaleFactor;
-  
-  countriesBoxX = width - (listBoxItemWidth) - 15 * scaleFactor;
-  countriesBoxY = height - (200 * scaleFactor);
-  countriesBoxWidth = listBoxItemWidth;
-  countriesBoxHeight = 200 * scaleFactor;
-  
-  removableCountriesBoxX = countriesBoxX - countriesBoxWidth - (10 * scaleFactor);
-  removableCountriesBoxY = countriesBoxY;
-  removableCountriesBoxHeight = countriesBoxHeight;
-  removableCountriesBoxWidth = countriesBoxWidth;
 
   helpButtonX = (width / 2) + 20 * scaleFactor;
   helpButtonY = height - (15 * scaleFactor);
@@ -145,50 +154,68 @@ void setup(){
 
   timelineX = 20 * scaleFactor;
   timelineY = 5;
-  timelineWidth = width / 2; 
+  timelineWidth = (width / 2); 
   timelineHeight = height - (helpButtonHeight) - (10 * scaleFactor);
-
+  
+  removableCountriesBoxX = timelineX + timelineWidth + (10 * scaleFactor);
+  removableCountriesBoxY = (height/3);
+  removableCountriesBoxHeight = 200 * scaleFactor;
+  removableCountriesBoxWidth = listBoxItemWidth;
+  
+  countriesBoxX = removableCountriesBoxX + removableCountriesBoxWidth + (10*scaleFactor);
+  countriesBoxY = removableCountriesBoxY;
+  countriesBoxWidth = listBoxItemWidth + (25 * scaleFactor);
+  countriesBoxHeight = 200 * scaleFactor;
+  
   movieInformationBoxX = timelineX + timelineWidth + (100 * scaleFactor);
   movieInformationBoxY = 5 * scaleFactor;
   movieInformationBoxWidth = 100;
   movieInformationBoxHeight = 200;
-
-  selectedCountries = new ArrayList<String>();
+  
+  moviesBoxWidth = countriesBoxWidth + (40*scaleFactor);
+  moviesBoxHeight = countriesBoxHeight;
+  moviesBoxX = width - (moviesBoxWidth) - (10*scaleFactor);
+  moviesBoxY = countriesBoxY;
+  
   selectedGenres = new ArrayList<String>();
   selectedKeywords = new ArrayList<String>();
   
   // The password will probably be different on the wall DB
-  moviesDB = new DatabaseAdapter(this, "root", "lexmark9", "p2");
-  
+  //if(!displayOnWall) {
+   moviesDB = new DatabaseAdapter(this, "root", "lexmark9", "monster_mash", "localhost");
+  //}
+  //else {
+    //moviesDB = new DatabaseAdapter(this, "cs424", "cs424", "monster_mash", "omgtracker.evl.uic.edu");
+  //}
+   
   // init all of the ui elements
   initGenreCheckbox();
   initKeywordCheckbox();
-  initCountriesBox();
   initRemovableCountriesBox();
-  //initMoviesBox();
+  
+  // load the data in
+  loadData();
+  
+  // these should be init'ed after data has been loaded
+  initCountriesBox();  
+  initMoviesBox();
   initTimeLine();
   initHelpButton(font);
   initCreditsButton(font);
   initMovieInformationBox(); 
-    
-  // note that it might take some time to load in data
-  // loadData();
 }
 
 public void loadData() {
-  println("Loading comedy movies per year...");
-  HashMap<Integer, Integer> comedyCount = moviesDB.getNumberMoviesPerYear("Comedy", 1890, 2012); 
-  println("Comedy movies per year loaded.");  
-  println("Loading horror movies per year...");
-  HashMap<Integer, Integer> horrorCount = moviesDB.getNumberMoviesPerYear("Horror", 1890, 2012); 
-  println("Horror movies per year loaded.");  
-  println("Loading muscial movies per year...");
-  HashMap<Integer, Integer> musicalCount = moviesDB.getNumberMoviesPerYear("Musical", 1890, 2012); 
-  println("Musical movies per year loaded.");  
-  println("Loading drama movies per year...");
-  HashMap<Integer, Integer> dramaCount = moviesDB.getNumberMoviesPerYear("Drama", 1890, 2012); 
-  println("drama movies per year loaded.");  
-} 
+  // Load in all of the movies
+  println("Getting all movies...");
+  ArrayList<String> movies = moviesDB.getMoviesWithGenres(Arrays.copyOf(selectedGenres.toArray(), selectedGenres.toArray().length, String[].class), 1890, 2012);
+  println("All movies loaded...");
+  listOfAllMovies = Arrays.copyOf(movies.toArray(), movies.toArray().length, String[].class);
+  // load in all countries
+  println("Getting all countries...");
+  listOfAllCountries = moviesDB.getAllCountries();
+  println("All countries loaded...");
+}
 
 boolean sketchFullScreen() {
   //if(displayOnWall) {
@@ -203,7 +230,9 @@ void draw() {
   // set BG color
   // background(#333333);    
   background(backgroundColor);
-  
+  omicronManager.process();
+
+  selectedCountries = removableCountriesBox.getCurrentItemsSelected();
   // draw timeline
   timeLine.draw();
   
@@ -234,10 +263,10 @@ void initGenreCheckbox() {
                      .setItemsPerRow(4)
                      .toUpperCase(false)
                      ;
-  //selectedGenres.add("Comedy");
-  //selectedGenres.add("Drama");
+  selectedGenres.add("Comedy");
+  selectedGenres.add("Drama");
   selectedGenres.add("Horror");
-  //selectedGenres.add("Musical");
+  selectedGenres.add("Musical");
   genreCheckbox.activateAll();
 }
 
@@ -257,7 +286,7 @@ void initKeywordCheckbox() {
 }
 
 void initCountriesBox(){
-   countriesBox = new SearchableListbox(cp5, countriesBoxX, countriesBoxY, countriesBoxHeight, countriesBoxWidth, listBoxItemHeight, listBoxItemWidth, test);
+   countriesBox = new SearchableListbox(cp5, countriesBoxX, countriesBoxY, countriesBoxHeight, countriesBoxWidth, listBoxItemHeight, countriesBoxWidth, listOfAllCountries, "countriesBox", true);
 }
 
 // Very very very dangerous way of doing this
@@ -266,6 +295,9 @@ void keyReleased() {
   if(countriesBox.isInFocus()) {
     countriesBox.keyReleased();  
   }
+  else if(moviesBox.isInFocus()) {
+    moviesBox.keyReleased(); 
+  }
 }
 
 void initTimeLine() {
@@ -273,11 +305,11 @@ void initTimeLine() {
 }
 
 void initMoviesBox() {
-  
+  moviesBox = new SearchableListbox(cp5, moviesBoxX, moviesBoxY, moviesBoxHeight, moviesBoxWidth, listBoxItemHeight, moviesBoxWidth, listOfAllMovies, "moviesBox", false);
 }
 
 void initRemovableCountriesBox() {
-    removableCountriesBox = new RemovableListbox(cp5, removableCountriesBoxX, removableCountriesBoxY, removableCountriesBoxHeight, removableCountriesBoxWidth, listBoxItemHeight);
+  removableCountriesBox = new RemovableListbox(cp5, removableCountriesBoxX, removableCountriesBoxY, removableCountriesBoxHeight, removableCountriesBoxWidth, listBoxItemHeight);
 }
 
 void initHelpButton(PFont font) {
@@ -316,3 +348,33 @@ void controlEvent(ControlEvent theEvent) {
     }
   } 
 }
+
+void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
+  println("X: " + xPos + " Y: " + yPos);
+  noFill();
+  stroke(255,0,0);
+  ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
+  cp5.getPointer().set(floor(xPos), floor(yPos));
+  if(displayOnWall) {
+    cp5.getPointer().pressed();
+  }
+}// touchDown
+
+void touchMove(int ID, float xPos, float yPos, float xWidth, float yWidth){
+  //println("touchMove(): Called from Proj class");
+  noFill();
+  stroke(0,255,0);
+  ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
+  cp5.getPointer().set(floor(xPos), floor(yPos));
+}// touchMove
+
+void touchUp(int ID, float xPos, float yPos, float xWidth, float yWidth){
+  //println("touchUp(): Called from Proj class");
+  noFill();
+  stroke(0,0,255);
+  ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
+  cp5.getPointer().set(floor(xPos), floor(yPos));  
+  if(displayOnWall) {
+    cp5.getPointer().released();
+  }
+}// touchUp
