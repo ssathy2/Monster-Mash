@@ -1,27 +1,13 @@
 import processing.net.*;
 import controlP5.*;
-<<<<<<< HEAD
 import java.util.*;
 import hypermedia.net.*;
-import omicronAPI.*;
-
-OmicronAPI omicronManager;
-TouchListener touchListener;
-
-PApplet applet;
-=======
 import omicronAPI.*;
 
 //Touch setup
 OmicronAPI omicronManager;
 TouchListener touchListener;
 PApplet applet;
-public void init() {
-  super.init();
-  omicronManager = new OmicronAPI(this);
-  omicronManager.setFullscreen(true);
-}
->>>>>>> 60b25ce9dc78ecc6f0bbba060adb8e320703fcb7
 
 // Primary controlP5 object
 ControlP5 cp5;
@@ -90,7 +76,7 @@ int scaleFactor;
   - decide whether we're displaying on the wall
   - decide whether we're running on a mbp (can't do P3D and 8160 by 2304 for some reason)
 */
-boolean displayOnWall = true;
+boolean displayOnWall = false;
 boolean displayMBP = true;
 
 int textColor = color(#DFDFDF);
@@ -98,50 +84,39 @@ int backgroundColor;
 
 public void init() {
   super.init();
-  omicronManager = new OmicronAPI(this);
-  //omicronManager.setFullscreen(true);
+  if(displayOnWall) {
+    omicronManager = new OmicronAPI(this);
+    omicronManager.setFullscreen(true);
+  }
 }
 
 void setup(){
-<<<<<<< HEAD
-  applet = this;
-  touchListener = new TouchListener();
-  omicronManager.setTouchListener(touchListener);
   
-  if(displayOnWall) {
+  if(displayOnWall) {    
+    applet = this;
+    touchListener = new TouchListener();
+    omicronManager.setTouchListener(touchListener);  
     omicronManager.ConnectToTracker(7001, 7340, "131.193.77.159");
+    touchListener = new TouchListener();
+    omicronManager.setTouchListener(touchListener);
+    applet = this;
   }
   
-  backgroundColor = color(#232323);
-   
-=======
-  size( 8160, 2304, JAVA2D ); // Cyber-Commons wall
-  scaleFactor = 5;
-  backgroundColor = color(#232323);
-  
-  //More touch setup
-  omicronManager.ConnectToTracker(7001, 7340, "131.193.77.159");
-  touchListener = new TouchListener();
-  omicronManager.setTouchListener(touchListener);
-  applet = this;
-  
-  
->>>>>>> 60b25ce9dc78ecc6f0bbba060adb8e320703fcb7
-  // set size and scalefactor
-//  if(displayOnWall) {
-//    if(!displayMBP) {
-//      size(8160, 2304, P3D);
-//      scaleFactor = 5;
-//    }
-//    else {
-//      size(8160, 2304);
-//      scaleFactor = 5;   
-//    }
-//  } else { 
-//    // change these to match your screen size
-//    size(2479,700);
-//    scaleFactor = 2;
-//  }
+  //set size and scalefactor
+  if(displayOnWall) {
+    if(!displayMBP) {
+      size(8160, 2304, P3D);
+      scaleFactor = 5;
+    }
+    else {
+      size(8160, 2304);
+      scaleFactor = 5;   
+    }
+  } else { 
+    // change these to match your screen size
+    size(2479,700);
+    scaleFactor = 2;
+  }
   
   lineColors = new int[6];
   // set some colors up yo
@@ -259,14 +234,13 @@ void draw() {
   // set BG color
   // background(#333333);    
   background(backgroundColor);
-<<<<<<< HEAD
-  omicronManager.process();
-
-  selectedCountries = removableCountriesBox.getCurrentItemsSelected();
-=======
-  omicronManager.process(); //touch
   
->>>>>>> 60b25ce9dc78ecc6f0bbba060adb8e320703fcb7
+  selectedCountries = removableCountriesBox.getCurrentItemsSelected();
+  
+  if(displayOnWall) {
+    omicronManager.process(); //touch
+  }
+  
   // draw timeline
   timeLine.draw();
   
@@ -381,7 +355,6 @@ void controlEvent(ControlEvent theEvent) {
       }
     }
   } 
-<<<<<<< HEAD
 }
 
 void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
@@ -413,22 +386,3 @@ void touchUp(int ID, float xPos, float yPos, float xWidth, float yWidth){
     cp5.getPointer().released();
   }
 }// touchUp
-=======
-  
-  void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
-    int x = (int)xPos;
-    int y = (int)yPos;
-
-    cp5.getPointer().set(x, y);
-    cp5.getPointer().pressed();  
-  }
-
-  void touchMove(int ID, float xPos, float yPos, float xWidth, float yWidth){
-
-  }
-
-  void touchUp(int ID, float xPos, float yPos, float xWidth, float yWidth){
-    cp5.getPointer().released();
-  }
-}
->>>>>>> 60b25ce9dc78ecc6f0bbba060adb8e320703fcb7
