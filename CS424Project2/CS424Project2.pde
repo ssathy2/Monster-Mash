@@ -1,5 +1,16 @@
 import processing.net.*;
 import controlP5.*;
+import omicronAPI.*;
+
+//Touch setup
+OmicronAPI omicronManager;
+TouchListener touchListener;
+PApplet applet;
+public void init() {
+  super.init();
+  omicronManager = new OmicronAPI(this);
+  omicronManager.setFullscreen(true);
+}
 
 // Primary controlP5 object
 ControlP5 cp5;
@@ -71,30 +82,39 @@ int scaleFactor;
   - decide whether we're displaying on the wall
   - decide whether we're running on a mbp (can't do P3D and 8160 by 2304 for some reason)
 */
-boolean displayOnWall = false;
+boolean displayOnWall = true;
 boolean displayMBP = true;
 
 int textColor = color(#DFDFDF);
 int backgroundColor;
 
 void setup(){
+  size( 8160, 2304, JAVA2D ); // Cyber-Commons wall
+  scaleFactor = 5;
   backgroundColor = color(#232323);
   
+  //More touch setup
+  omicronManager.ConnectToTracker(7001, 7340, "131.193.77.159");
+  touchListener = new TouchListener();
+  omicronManager.setTouchListener(touchListener);
+  applet = this;
+  
+  
   // set size and scalefactor
-  if(displayOnWall) {
-    if(!displayMBP) {
-      size(8160, 2304, P3D);
-      scaleFactor = 5;
-    }
-    else {
-      size(8160, 2304);
-      scaleFactor = 5;   
-    }
-  } else { 
-    // change these to match your screen size
-    size(2479,700);
-    scaleFactor = 2;
-  }
+//  if(displayOnWall) {
+//    if(!displayMBP) {
+//      size(8160, 2304, P3D);
+//      scaleFactor = 5;
+//    }
+//    else {
+//      size(8160, 2304);
+//      scaleFactor = 5;   
+//    }
+//  } else { 
+//    // change these to match your screen size
+//    size(2479,700);
+//    scaleFactor = 2;
+//  }
   
   lineColors = new int[6];
   // set some colors up yo
@@ -109,6 +129,7 @@ void setup(){
 
   // init cp5 object
   cp5 = new ControlP5(this);
+  //cp5.getPointer().enable();
   cp5.setFont(font);
   
   // initialize the x,y, sizes of the ui elements
@@ -203,6 +224,7 @@ void draw() {
   // set BG color
   // background(#333333);    
   background(backgroundColor);
+  omicronManager.process(); //touch
   
   // draw timeline
   timeLine.draw();
@@ -315,4 +337,20 @@ void controlEvent(ControlEvent theEvent) {
       }
     }
   } 
+  
+  void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
+    int x = (int)xPos;
+    int y = (int)yPos;
+
+    cp5.getPointer().set(x, y);
+    cp5.getPointer().pressed();  
+  }
+
+  void touchMove(int ID, float xPos, float yPos, float xWidth, float yWidth){
+
+  }
+
+  void touchUp(int ID, float xPos, float yPos, float xWidth, float yWidth){
+    cp5.getPointer().released();
+  }
 }
