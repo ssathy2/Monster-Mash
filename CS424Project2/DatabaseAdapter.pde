@@ -22,11 +22,11 @@ class DatabaseAdapter {
     int n = 1;
     for (String s : keys) {
         if (n==1) {
-          keyString = "'[[:<:]]"+s+"[[:>:]]";
+          keyString = "'[[:<:]]"+s.toLowerCase()+"[[:>:]]";
           n++;
         }
         else {
-          keyString = keyString + "|" + "[[:<:]]"+s+"[[:>:]]";
+          keyString = keyString + "|" + "[[:<:]]"+s.toLowerCase()+"[[:>:]]";
         }
      }
     return (keyString + "'"); 
@@ -34,16 +34,16 @@ class DatabaseAdapter {
   
   public HashMap<Integer, Integer> getMovieCount(String[] genreList, String[] keywords, int yearStart, int yearEnd) {
     HashMap<Integer, Integer> retMap = new HashMap<Integer, Integer>();
-    String genreString = generateGenreQueryString(genreList);
-    String keywordString = generateKeywordString(keywords);
+    if(genreList.length > 0 && keywords.length > 0) {
+      String genreString = generateGenreQueryString(genreList);
+      String keywordString = generateKeywordString(keywords);
     
-    if(msql.connect()) {
-      msql.query("select yearMovie,count(*) from movie where idMovie in (select idMovie from genre where genreMovie in ("+genreString+") and idMovie in (select idMovie from keyword where keywordMovie REGEXP "+keywordString+") and yearMovie between "+yearStart+" and "+yearEnd+") group by yearMovie");
-           
-      // kinda hacky and ovekill and slow but yea  
-      while(msql.next()) {
-        retMap.put(msql.getInt("movie.yearMovie"), msql.getInt("count(*)")); 
-      }  
+      if(msql.connect()) {
+        msql.query("select yearMovie,count(*) from movie where idMovie in (select idMovie from genre where genreMovie in ("+genreString+") and idMovie in (select idMovie from keyword where keywordMovie REGEXP "+keywordString+") and yearMovie between "+yearStart+" and "+yearEnd+") group by yearMovie");
+        while(msql.next()) {
+          retMap.put(msql.getInt("movie.yearMovie"), msql.getInt("count(*)")); 
+        }  
+      }
     }
     return cleanedUpMap(retMap);    
   }

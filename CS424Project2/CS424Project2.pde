@@ -29,6 +29,7 @@ Timeline timeLine;
 ArrayList<String> selectedCountries;
 ArrayList<String> selectedGenres;
 ArrayList<String> selectedKeywords;
+boolean isGenreKeywordChanged;
 
 // String arr of all countries
 String listOfAllCountries[];
@@ -97,9 +98,6 @@ void setup(){
     touchListener = new TouchListener();
     omicronManager.setTouchListener(touchListener);  
     omicronManager.ConnectToTracker(7001, 7340, "131.193.77.159");
-    touchListener = new TouchListener();
-    omicronManager.setTouchListener(touchListener);
-    applet = this;
   }
   
   //set size and scalefactor
@@ -183,6 +181,7 @@ void setup(){
   
   selectedGenres = new ArrayList<String>();
   selectedKeywords = new ArrayList<String>();
+  isGenreKeywordChanged = true;
   
   // The password will probably be different on the wall DB
   if(!displayOnWall) {
@@ -282,13 +281,19 @@ void initKeywordCheckbox() {
   keywordCheckbox = cp5.addCheckBox("keywordCheckbox")
                        .setPosition(keywordCheckboxX, keywordCheckboxY)
                        .setSize(keywordCheckboxWidth, keywordCheckboxHeight)
-                       .addItem("Aliens", 0)
-                       .addItem("Vampires", 1)
-                       .addItem("Demons", 2)
-                       .addItem("More Monsters Here", 3)
+                       .addItem("Alien", 0)
+                       .addItem("Demon", 1)
+                       .addItem("Insect", 2)
+                       .addItem("Ghost", 3)
+                       .addItem("Ghoul", 4) 
+                       .addItem("Monster", 5)
+                       .addItem("Mutant", 6)
+                       .addItem("Werewolf", 7)
+                       .addItem("Vampire",8) 
+                       .addItem("Zombie", 9)
                        .setSpacingColumn(scaleFactor * 40)
                        .setSpacingRow(scaleFactor * 10)
-                       .setItemsPerRow(2)
+                       .setItemsPerRow(5)
                        .toUpperCase(false)
                        ;
 }
@@ -342,7 +347,8 @@ void controlEvent(ControlEvent theEvent) {
     for (int i=0;i<genreCheckbox.getArrayValue().length;i++) { 
       int n = (int)genreCheckbox.getArrayValue()[i];
       if(n == 1) {
-        selectedGenres.add(genreCheckbox.getItem(i).getLabel()); 
+        selectedGenres.add(genreCheckbox.getItem(i).getLabel());
+        isGenreKeywordChanged = true; 
       }
     }
   }
@@ -351,7 +357,8 @@ void controlEvent(ControlEvent theEvent) {
     for (int i=0;i<keywordCheckbox.getArrayValue().length;i++) { 
       int n = (int)keywordCheckbox.getArrayValue()[i];
       if(n == 1) {
-        selectedKeywords.add(keywordCheckbox.getItem(i).getLabel()); 
+        selectedKeywords.add(keywordCheckbox.getItem(i).getLabel());
+        isGenreKeywordChanged = true; 
       }
     }
   } 

@@ -40,7 +40,8 @@ class Timeline {
   HashMap<Integer, Integer> horrorCount;  
   HashMap<Integer, Integer> musicalCount;
   HashMap<Integer, Integer> dramaCount;
-
+  HashMap<Integer, Integer> genreKeyword;
+  
   HashMap<String, HashMap<Integer, Integer>> cachedCountries;
   HashMap<String, HashMap<Integer, Integer>> cachedKeywordGenres;
   
@@ -101,7 +102,12 @@ class Timeline {
     println("Musical movies per year loaded.");  
     println("Loading drama movies per year...");
     dramaCount = moviesDB.getNumberMoviesPerYear("Drama", 1890, 2012); 
-    println("drama movies per year loaded.");  
+    println("drama movies per year loaded.");
+    println("Loading keyword genre data...");
+    genreKeyword = moviesDB.getMovieCount(Arrays.copyOf(selectedGenres.toArray(), selectedGenres.toArray().length, String[].class),
+                                                                     Arrays.copyOf(selectedKeywords.toArray(), selectedKeywords.toArray().length, String[].class), 
+                                                                     1890, 2012);  
+    println("Keyword genre data loaded");
   } 
 
   public void drawYearLabels() {
@@ -158,8 +164,8 @@ class Timeline {
     // TODO: Need some way to draw the lines for the time-line
     //       Need some color coding scheme...use line-color array
     if(selectedCountries.isEmpty()) {
-      if(selectedGenres.isEmpty() && selectedKeywords.isEmpty()) {
-        drawGenreKeywordLine();
+      if(!selectedGenres.isEmpty() && !selectedKeywords.isEmpty()) {
+          drawGenreKeywordLine();
       }
       else {
         stroke(#EDFC47);
@@ -173,14 +179,23 @@ class Timeline {
   }
   
   public void drawGenreKeywordLine() {
-    
-    
+     // this is suicidal...each query execution takes like mf'in 3ish seconds, gots to figure out a way to cache these damn things
+     if(isGenreKeywordChanged) {
+       println("Getting keyword/genres...");
+       genreKeyword = moviesDB.getMovieCount(Arrays.copyOf(selectedGenres.toArray(), selectedGenres.toArray().length, String[].class),
+                                                                     Arrays.copyOf(selectedKeywords.toArray(), selectedKeywords.toArray().length, String[].class), 
+                                                                     1890, 2012);
+       println("Keyword/genres loaded");
+       isGenreKeywordChanged = false;
+     }
+     drawColoredLine(#E31A45, genreKeyword);
   }
   
   public void drawCountryLines() {
     for(int i = 0; i < selectedCountries.size(); i++) {
       String country = selectedCountries.get(i);
       if(cachedCountries.containsKey(country)) {
+        println("Found movies cached for: " + country);
         drawColoredLine(lineColors[i], cachedCountries.get(country));   
       } 
       else {
@@ -222,6 +237,7 @@ class Timeline {
     beginShape();
     for (int i = yearsMin; i <= yearsMax ; i++) {
       float value = (float) ((i == 2012)?displayArr[i - 1890 - 1]:displayArr[i - 1890]);
+      println(value);
       float x = map(i, yearsMin, yearsMax, plotX1, plotX2);
       float y = map(value, 0, maxVal, plotY2, plotY1);
       vertex(x,y);
