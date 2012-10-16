@@ -17,6 +17,24 @@ class DatabaseAdapter {
    msql = new MySQL(parent, server, database, user, pass);
   }
   
+  public ArrayList<String> getMonstersAssociatedWithMovie(String movie) {
+    ArrayList<String> monsters = new ArrayList<String>();
+    msql.query("select keywordMovie from keyword where idMovie = (select idMovie from movie where titleMovie = '"+movie+"')");
+    while(msql.next()) {
+      monsters.add(msql.getString("keywordMovie"));
+    }  
+    return monsters;
+  }
+  
+  public String getYearAssociatedWithMovie(String movie) {
+    msql.query("select yearMovie from movie where titleMovie='"+movie+"'");
+    String m = "";
+    while(msql.next()) {
+      m = msql.getString("yearMovie");  
+    }
+    return m;
+  }
+  
   private String generateKeywordString(String[] keys) {
     String keyString = "";
     int n = 1;

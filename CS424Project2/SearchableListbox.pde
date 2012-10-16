@@ -30,7 +30,7 @@ class SearchableListbox {
   public SearchableListbox(ControlP5 p5, int xPos, int yPos, int boxHeight, int boxWidth, int searchBoxHeight, int searchBoxWidth, String[] items, String n, boolean s) {
      searchboxxPos = xPos;
      searchboxyPos = yPos;
-     searchboxHeight = searchBoxHeight;
+     searchboxHeight = searchBoxHeight + 5 * scaleFactor;
      searchboxWidth = searchBoxWidth;
      listboxItems = items;
      listboxxPos = xPos;
@@ -51,12 +51,20 @@ class SearchableListbox {
                   .setItemHeight(listboxItemHeight)
                   .toUpperCase(false)
                   .addListener(listener)
-                  .addItems(listboxItems);
+                  .addItems(listboxItems)
+                  .setColorBackground(#DFDFDF)
+                  .setColorForeground(#AFAFAF)
+                  .setColorLabel(#232323)
+                  ;
                   
      inputBox = p5.addTextfield(n+"inputBox")
                   .setPosition(searchboxxPos, searchboxyPos)
                   .setSize(searchboxWidth, searchboxHeight)
                   .setLabel("")
+                  .setColorBackground(#DFDFDF)
+                  .setColorForeground(#232323)
+                  .setColorValueLabel(#232323)
+                  .setColorCursor(#232323)
                   ;  
      name = n;
      secret = s;     
@@ -81,13 +89,19 @@ class SearchableListbox {
      return currentSelectedItem;
   }
   
+  public void setText(String t) {
+    inputBox.setText(t); 
+    keyReleased();
+  }
+  
   class MyControlListener implements ControlListener {
     int currentIndex;
     public void controlEvent(ControlEvent theEvent) {
       if(theEvent.isFrom(name)) {
          currentIndex = (int)theEvent.group().value();
+         currentSelectedItem = listboxItems[currentIndex];
          inputBox.setText(listboxItems[currentIndex]);
-         
+         movieInformationBox.updateInformationBox(currentSelectedItem);
          // draw removable countries box
          // This is fucking hacky as hell but for some reason, putting this call inside the draw function of the main app is
          // adding it twice...For now this is meh but due to time constraints it works and yea, throw it in and worry later      

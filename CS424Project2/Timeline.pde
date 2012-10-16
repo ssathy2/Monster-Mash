@@ -50,7 +50,7 @@ class Timeline {
     listener = new RangeControlListener();
     
     parent = p;
-    plotX1 = (float)timelineX;
+    plotX1 = (float)timelineX + (5 * scaleFactor);
     plotY1 = (float)(timelineY + (40 * scaleFactor));
     
     sliderHeight = 25 * scaleFactor;
@@ -80,8 +80,6 @@ class Timeline {
                     .setRangeValues(1890, 2012)
                     // after the initialization we turn broadcast back on again
                     .setBroadcast(true)
-                    .showTickMarks(true)
-                    .snapToTickMarks(true)
                     .addListener(listener)
                     ;
       title = "BLAH BLAH TEST TITLE";
@@ -148,13 +146,13 @@ class Timeline {
       float yPos = map(i, dataMin, dataMax, plotY2, plotY1);
       if (i == dataMin) {
           textAlign(RIGHT, CENTER);                 // Align by the bottom
-          text(i, plotX1 - 4, yPos); 
+          text(i, plotX1 - 3, yPos); 
       } else if (i == dataMax) {
           textAlign(RIGHT, CENTER);            // Align by the top
-          text(i, plotX1 - 4, yPos); 
+          text(i, plotX1 - 3, yPos); 
       } else {
           textAlign(RIGHT, CENTER);            // Align by the top
-          text(i, plotX1 - 4, yPos);     
+          text(i, plotX1 - 3, yPos);     
       }
       line(plotX1, yPos, plotX2, yPos); 
     }
@@ -189,6 +187,17 @@ class Timeline {
        isGenreKeywordChanged = false;
      }
      drawColoredLine(#E31A45, genreKeyword);
+     drawUnitLabels(0, getMaxValue(genreKeyword), 5);
+  }
+  
+  private int getMaxValue(HashMap<Integer, Integer> m) {
+    int maxVal = 0;
+    for(int i = 1890; i <= 2012; i++) {
+      if(m.get(i) > maxVal) {
+        maxVal = m.get(i);
+      }  
+    }
+    return maxVal;
   }
   
   public void drawCountryLines() {
@@ -237,7 +246,6 @@ class Timeline {
     beginShape();
     for (int i = yearsMin; i <= yearsMax ; i++) {
       float value = (float) ((i == 2012)?displayArr[i - 1890 - 1]:displayArr[i - 1890]);
-      println(value);
       float x = map(i, yearsMin, yearsMax, plotX1, plotX2);
       float y = map(value, 0, maxVal, plotY2, plotY1);
       vertex(x,y);

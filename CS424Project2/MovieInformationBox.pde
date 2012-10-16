@@ -50,20 +50,21 @@ class MovieInformationBox {
   public void draw() {
     if(showBox) {
       // Draw a border...seems hacky -> need to do research on drawing a border a different way
-      parentApplet.fill(#00FFFE);
       parentApplet.rectMode(CORNERS);
-      parentApplet.noStroke();
+      parentApplet.stroke(#00FFFE);
       parentApplet.rect(boxXPos, boxYPos, boxXPos + boxWidth, boxYPos + boxHeight, 7);
-      
-      parentApplet.fill(backgroundColor);
-      parentApplet.rectMode(CORNERS);
-      parentApplet.noStroke();
-      parentApplet.rect(boxXPos + scaleFactor/2, boxYPos + scaleFactor/2, (boxXPos + boxWidth) - scaleFactor/2, (boxYPos + boxHeight) - scaleFactor/2, 7);
+   
+      drawMovieText();
+      drawYearText();
+      drawMonstersText();
     }
   }
   
   public void drawMovieText() {
-    
+    parentApplet.textFont(font);
+    parentApplet.textSize(10 * scaleFactor);
+    parentApplet.text(movieText, boxXPos/2, 5 * scaleFactor);
+    println(movieText);
   }
   
   public void drawYearText() {
@@ -80,5 +81,21 @@ class MovieInformationBox {
   
   public void drawMonstersText() {
     
+  }
+  
+  public void updateInformationBox(String name) {
+    yearText = moviesDB.getYearAssociatedWithMovie(name);
+    ArrayList<String> monsters = moviesDB.getMonstersAssociatedWithMovie(name);
+    movieText = name;
+    String m = "";
+    for(int i = 0; i < monsters.size(); i++) {
+      if(i == monsters.size() - 1) { 
+         m += monsters.get(i); 
+      }
+      else {
+         m += monsters.get(i) + ", ";
+      }
+    }
+    monstersText = m;
   }
 }

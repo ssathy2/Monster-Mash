@@ -24,6 +24,7 @@ SearchableListbox moviesBox;
 RemovableListbox removableCountriesBox;
 MovieInformationBox movieInformationBox;
 Timeline timeLine;
+Keyboard onScreenKeyboard;
 
 // Arraylists that contain currently selected countries, genres, and monsters
 ArrayList<String> selectedCountries;
@@ -36,6 +37,8 @@ String listOfAllCountries[];
 
 //list of all movies
 String listOfAllMovies[];
+
+String currentMovieSelected;
 
 // Sample line colors for now... 
 int[] lineColors; 
@@ -70,6 +73,9 @@ int creditsButtonHeight, creditsButtonWidth;
 int timelineX, timelineY;
 int timelineWidth, timelineHeight;
 
+int onscreenKeyboardX, onscreenKeyboardY;
+int onscreenKeyboardHeight, onscreenKeyboardWidth;
+
 int scaleFactor;
 
 /*
@@ -86,18 +92,21 @@ int backgroundColor;
 public void init() {
   super.init();
   if(displayOnWall) {
-    omicronManager = new OmicronAPI(this);
-    omicronManager.setFullscreen(true);
+    if(!displayMBP) {
+      omicronManager = new OmicronAPI(this);
+      omicronManager.setFullscreen(true);
+    }
   }
 }
 
 void setup(){
-  
   if(displayOnWall) {    
+    if(!displayMBP) {
     applet = this;
     touchListener = new TouchListener();
     omicronManager.setTouchListener(touchListener);  
     omicronManager.ConnectToTracker(7001, 7340, "131.193.77.159");
+    }
   }
   
   //set size and scalefactor
@@ -133,15 +142,6 @@ void setup(){
   cp5.setFont(font);
   
   // initialize the x,y, sizes of the ui elements
-  genreCheckboxX = width - (scaleFactor * 250);
-  genreCheckboxY = scaleFactor * 40;
-  genreCheckboxHeight = scaleFactor * 20;
-  genreCheckboxWidth = scaleFactor * 20;
-  keywordCheckboxX = genreCheckboxX;
-  keywordCheckboxY = genreCheckboxY + genreCheckboxHeight + (20 * scaleFactor);
-  keywordCheckboxHeight = scaleFactor * 20;
-  keywordCheckboxWidth = scaleFactor * 20;
-  
   listBoxItemHeight = 18 * scaleFactor;
   listBoxItemWidth = 100 * scaleFactor;
 
@@ -164,32 +164,46 @@ void setup(){
   removableCountriesBoxHeight = 200 * scaleFactor;
   removableCountriesBoxWidth = listBoxItemWidth;
   
-  countriesBoxX = removableCountriesBoxX + removableCountriesBoxWidth + (10*scaleFactor);
+  countriesBoxX = removableCountriesBoxX + removableCountriesBoxWidth + (20*scaleFactor);
   countriesBoxY = removableCountriesBoxY;
   countriesBoxWidth = listBoxItemWidth + (25 * scaleFactor);
   countriesBoxHeight = 200 * scaleFactor;
   
-  movieInformationBoxX = timelineX + timelineWidth + (100 * scaleFactor);
-  movieInformationBoxY = 5 * scaleFactor;
-  movieInformationBoxWidth = 100;
-  movieInformationBoxHeight = 200;
+  genreCheckboxX = countriesBoxX + countriesBoxWidth + (40 * scaleFactor);
+  genreCheckboxY = (height/3);
+  genreCheckboxHeight = scaleFactor * 20;
+  genreCheckboxWidth = scaleFactor * 20;
+  keywordCheckboxX = genreCheckboxX;
+  keywordCheckboxY = (height/2);
+  keywordCheckboxHeight = scaleFactor * 20;
+  keywordCheckboxWidth = scaleFactor * 20;
   
+  onscreenKeyboardX = genreCheckboxX;
+  onscreenKeyboardY = height - (50 * scaleFactor);
+  onscreenKeyboardHeight = scaleFactor * 10;
+  onscreenKeyboardWidth = scaleFactor * 20;
+ 
   moviesBoxWidth = countriesBoxWidth + (40*scaleFactor);
   moviesBoxHeight = countriesBoxHeight;
   moviesBoxX = width - (moviesBoxWidth) - (10*scaleFactor);
   moviesBoxY = countriesBoxY;
+  
+  movieInformationBoxX = timelineX + timelineWidth + (100 * scaleFactor);
+  movieInformationBoxY = 5 * scaleFactor;
+  movieInformationBoxWidth = moviesBoxWidth;
+  movieInformationBoxHeight = 200;
   
   selectedGenres = new ArrayList<String>();
   selectedKeywords = new ArrayList<String>();
   isGenreKeywordChanged = true;
   
   // The password will probably be different on the wall DB
-  if(!displayOnWall) {
+  //if(!displayOnWall) {
    moviesDB = new DatabaseAdapter(this, "root", "lexmark9", "monster_mash", "localhost");
-  }
-  else {
-   moviesDB = new DatabaseAdapter(this, "cs424", "cs424", "monster_mash", "omgtracker.evl.uic.edu");
-  }
+  //}
+  //else {
+  // moviesDB = new DatabaseAdapter(this, "cs424", "cs424", "monster_mash", "omgtracker.evl.uic.edu");
+  //}
    
   // init all of the ui elements
   initGenreCheckbox();
@@ -206,6 +220,7 @@ void setup(){
   initHelpButton(font);
   initCreditsButton(font);
   initMovieInformationBox(); 
+  initOnScreenKeyboard();
 }
 
 public void loadData() {
@@ -235,9 +250,16 @@ void draw() {
   background(backgroundColor);
   
   selectedCountries = removableCountriesBox.getCurrentItemsSelected();
+  currentMovieSelected = moviesBox.getLastSelectedItem();
+  
+  if(currentMovieSelected != "") {
+    movieInformationBox.draw();
+  }
   
   if(displayOnWall) {
-    omicronManager.process(); //touch
+    if(!displayMBP) {
+      omicronManager.process(); //touch
+    }
   }
   
   // draw timeline
@@ -246,16 +268,28 @@ void draw() {
   // draw the help and credits buttons
   helpButton.draw();
   creditsButton.draw(); 
-  
-  movieInformationBox.draw();
-  
+    
+  if(countriesBox.isInFocus()) {
+    onScreenKeyboard.draw();
+    /*countriesBox.setText(onScreenKeyboard.getInput());
+    countriesBox.inputBox.setFocus(true);
+    moviesBox.inputBox.setFocus(false);*/
+  }
+  else if(moviesBox.isInFocus()) {
+    onScreenKeyboard.draw();
+    /*moviesBox.setText(onScreenKeyboard.getInput());
+    moviesBox.inputBox.setFocus(true);
+    countriesBox.inputBox.setFocus(false);*/
+  }
+     
   // draw genre, countries, and monsters string labels
   textFont(font);
-  textSize(8 * scaleFactor);
+  textSize(9 * scaleFactor);
   fill(#DFDFDF);
-  text("Genres", (genreCheckboxX + (genreCheckboxWidth/2)), genreCheckboxY - (5*scaleFactor));
-  text("Monsters", (keywordCheckboxX + (keywordCheckboxWidth/2)), keywordCheckboxY - (5*scaleFactor));
-  text("Countries of Origin", (countriesBoxX + (countriesBoxWidth / 2)), countriesBoxY - (5 * scaleFactor));
+  text("Genres", (genreCheckboxX + (genreCheckboxWidth/2)), genreCheckboxY - (10*scaleFactor));
+  text("Monsters", (keywordCheckboxX + (keywordCheckboxWidth/2)), keywordCheckboxY - (10*scaleFactor));
+  text("Countries of Origin", (countriesBoxX + (countriesBoxWidth / 2)), countriesBoxY - (10 * scaleFactor));
+  text("Movies", (moviesBoxX + (moviesBoxWidth / 2)), moviesBoxY - (10 * scaleFactor));
 }
 
 void initGenreCheckbox() {
@@ -269,6 +303,9 @@ void initGenreCheckbox() {
                      .setSpacingColumn(scaleFactor * 40)
                      .setItemsPerRow(4)
                      .toUpperCase(false)
+                     .setColorActive(#DFDFDF)
+                       .setColorBackground(#3C6C71)
+                     .setColorForeground(#AFAFAF)
                      ;
   selectedGenres.add("Comedy");
   selectedGenres.add("Drama");
@@ -295,6 +332,9 @@ void initKeywordCheckbox() {
                        .setSpacingRow(scaleFactor * 10)
                        .setItemsPerRow(5)
                        .toUpperCase(false)
+                       .setColorActive(#DFDFDF)
+                       .setColorBackground(#3C6C71)
+                       .setColorForeground(#AFAFAF)
                        ;
 }
 
@@ -302,14 +342,18 @@ void initCountriesBox(){
    countriesBox = new SearchableListbox(cp5, countriesBoxX, countriesBoxY, countriesBoxHeight, countriesBoxWidth, listBoxItemHeight, countriesBoxWidth, listOfAllCountries, "countriesBox", true);
 }
 
+void initOnScreenKeyboard() {
+   onScreenKeyboard = new Keyboard(this, onscreenKeyboardWidth, onscreenKeyboardHeight, onscreenKeyboardX, onscreenKeyboardY, font, #DFDFDF, #DFDFDF, #232323);
+}
+
 // Very very very dangerous way of doing this
 void keyReleased() {
   // should prob look for a different way of doing this...
   if(countriesBox.isInFocus()) {
-    countriesBox.keyReleased();  
+    countriesBox.keyReleased();
   }
   else if(moviesBox.isInFocus()) {
-    moviesBox.keyReleased(); 
+    moviesBox.keyReleased();       
   }
 }
 
@@ -364,11 +408,17 @@ void controlEvent(ControlEvent theEvent) {
   } 
 }
 
+void mousePressed() {
+  onScreenKeyboard.Clicked(mouseX, mouseY);
+}
+
 void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
   println("X: " + xPos + " Y: " + yPos);
   noFill();
   stroke(255,0,0);
   ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
+  mouseX = floor(xPos);
+  mouseY = floor(yPos);
   cp5.getPointer().set(floor(xPos), floor(yPos));
   if(displayOnWall) {
     cp5.getPointer().pressed();
@@ -380,6 +430,8 @@ void touchMove(int ID, float xPos, float yPos, float xWidth, float yWidth){
   noFill();
   stroke(0,255,0);
   ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
+  mouseX = floor(xPos);
+  mouseY = floor(yPos);
   cp5.getPointer().set(floor(xPos), floor(yPos));
 }// touchMove
 
@@ -388,7 +440,9 @@ void touchUp(int ID, float xPos, float yPos, float xWidth, float yWidth){
   noFill();
   stroke(0,0,255);
   ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
-  cp5.getPointer().set(floor(xPos), floor(yPos));  
+  cp5.getPointer().set(floor(xPos), floor(yPos));
+  mouseX = floor(xPos);
+  mouseY = floor(yPos); 
   if(displayOnWall) {
     cp5.getPointer().released();
   }
