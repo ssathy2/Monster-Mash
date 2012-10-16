@@ -10,6 +10,7 @@ import controlP5.*;
  */
 
 class Timeline {
+  //FloatTable data;
   
   PApplet parent;
   Range yearsSlider;
@@ -42,7 +43,6 @@ class Timeline {
   HashMap<Integer, Integer> dramaCount;
 
   HashMap<String, HashMap<Integer, Integer>> cachedCountries;
-  HashMap<String, HashMap<Integer, Integer>> cachedKeywordGenres;
   
   public Timeline(PApplet p, ControlP5 p5, int timelineX, int timelineY, int timelineWidthParam, int timelineHeightParam, String sliderName) {
     // use this object to grab latest sliderYearMax and slideryearMin values
@@ -85,7 +85,6 @@ class Timeline {
                     ;
       title = "BLAH BLAH TEST TITLE";
       cachedCountries = new HashMap<String, HashMap<Integer, Integer>>();
-      cachedKeywordGenres = new HashMap<String, HashMap<Integer, Integer>>();
       loadData();  
   }
   
@@ -158,23 +157,14 @@ class Timeline {
     // TODO: Need some way to draw the lines for the time-line
     //       Need some color coding scheme...use line-color array
     if(selectedCountries.isEmpty()) {
-      if(selectedGenres.isEmpty() && selectedKeywords.isEmpty()) {
-        drawGenreKeywordLine();
-      }
-      else {
-        stroke(#EDFC47);
-        strokeWeight(2);
-        drawDataLine();    
-      }
+      stroke(#EDFC47);
+      strokeWeight(2);
+      drawDataLine(); 
     }
     else {
       drawCountryLines();
+      //drawUnitLabels(0, 
     }
-  }
-  
-  public void drawGenreKeywordLine() {
-    
-    
   }
   
   public void drawCountryLines() {

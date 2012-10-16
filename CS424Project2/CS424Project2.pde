@@ -128,10 +128,10 @@ void setup(){
   lineColors[5] = color(#237BDD);
   
   font = createFont("SansSerif", 7 * scaleFactor);
+
   // init cp5 object
   cp5 = new ControlP5(this);
   //cp5.getPointer().enable();
-  backgroundColor = color(#232323);
   cp5.setFont(font);
   
   // initialize the x,y, sizes of the ui elements
@@ -185,12 +185,12 @@ void setup(){
   selectedKeywords = new ArrayList<String>();
   
   // The password will probably be different on the wall DB
-  if(!displayOnWall) {
+  //if(!displayOnWall) {
    moviesDB = new DatabaseAdapter(this, "root", "lexmark9", "monster_mash", "localhost");
-  }
-  else {
-   moviesDB = new DatabaseAdapter(this, "cs424", "cs424", "monster_mash", "omgtracker.evl.uic.edu");
-  }
+  //}
+  //else {
+    //moviesDB = new DatabaseAdapter(this, "cs424", "cs424", "monster_mash", "omgtracker.evl.uic.edu");
+  //}
    
   // init all of the ui elements
   initGenreCheckbox();
