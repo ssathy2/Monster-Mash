@@ -19,7 +19,7 @@ class Table {
   int yearsSliderHandleSize;
   
   String rangeName;
-  String title; 
+  String title = ""; 
    
   float plotX1, plotY1;
   float plotX2, plotY2;
@@ -53,6 +53,8 @@ class Table {
     this.tableWidth = tableWidth;
     this.tableHeight = tableHeight;
     this.font = font;
+    this.timelineWidth = timelineWidth;
+    //this.timelineHeight = timelineHeight;
     
     
     // use this object to grab latest sliderYearMax and slideryearMin values
@@ -272,6 +274,8 @@ class Table {
     float y1 = yPos;
     float y2 = yPos + tableHeight;
     
+
+    
     //Now draw table
      for(int i = 1890; i <=2012; i = i+10){
         try{
@@ -279,6 +283,7 @@ class Table {
           tmpSum = sums.get(tmpYear);
           
           parent.stroke(#DFDFDF);
+          parent.strokeWeight(1*scaleFactor);
           parent.fill(backgroundColor);
           parent.rectMode(parent.CORNERS);
           
@@ -392,6 +397,7 @@ class Table {
     float y1 = yPos;
     float y2 = yPos + tableHeight;
     
+    
     //Now draw table
      for(int i = 1890; i <=2012; i = i+10){
         try{
@@ -399,6 +405,7 @@ class Table {
           tmpSum = sums.get(tmpYear);
           
           parent.stroke(#DFDFDF);
+          parent.strokeWeight(1*scaleFactor);
           parent.fill(backgroundColor);
           parent.rectMode(parent.CORNERS);
           
@@ -427,6 +434,47 @@ class Table {
     //drawUnitLabels(0, maxVal, 1000);
   }
   
+    public void drawTitle() {
+      //println("in table draw title");
+//    if(isDrawingCountryData) { 
+//      title = "Movie count for the selected countries: ";
+//      for(int i = 0; i < selectedCountries.size(); i++) {
+//        if(i == selectedCountries.size() - 1) {
+//          title += selectedCountries.get(i); 
+//        }else {
+//          title += selectedCountries.get(i) + ", ";  
+//        }
+//      }
+//    } else {
+      title = "Movie count for the following genres: ";
+      for(int i = 0; i < selectedGenres.size(); i++) {
+        if(i == selectedGenres.size() - 1 && selectedKeywords.size() > 0) {
+          title += selectedGenres.get(i) + "  and the following monsters: " ; 
+        }else if(i == selectedGenres.size() - 1){
+          title += selectedGenres.get(i);
+        }else {
+          title += selectedGenres.get(i) + ", ";  
+        }
+      }
+      if(selectedKeywords.size() > 0) {
+        for(int i = 0; i < selectedKeywords.size(); i++) {
+          if(i == selectedKeywords.size() - 1) {
+            title += selectedKeywords.get(i); 
+          }else {
+            title += selectedKeywords.get(i) + ", ";  
+          }      
+        }
+      }
+    //}
+    
+    fill(#DFDFDF);
+    textSize(8 * scaleFactor);
+    textAlign(CENTER);
+    
+    text(title, width/4+50*scaleFactor, 25*scaleFactor);
+    //text(title, (timelineX + timelineWidth / 2), (timelineY - ((40 * scaleFactor) / 2)));
+  }
+  
   public int getMaxValue(int[] numbers){  
   int maxValue = numbers[0];  
     for(int i=1;i < numbers.length;i++){  
@@ -438,6 +486,7 @@ class Table {
   }  
   
   public void draw() {
+    //println("in table draw");
     if(isPlotVisible) {
             // TODO: Should timeline have same bg color as regular app?
       parent.fill(backgroundColor);
@@ -451,13 +500,13 @@ class Table {
     }
   }
   
-  public void drawTitle() {
-    fill(#DFDFDF);
-    textSize(8 * scaleFactor);
-    textAlign(CENTER);
-    
-    text(title, (plotX1 + tableWidth / 2), (plotY1 - ((40 * scaleFactor) / 2)));
-  }
+//  public void drawTitle() {
+//    fill(#DFDFDF);
+//    textSize(8 * scaleFactor);
+//    textAlign(CENTER);
+//    
+//    text(title, (plotX1 + tableWidth / 2), (plotY1 - ((40 * scaleFactor) / 2)));
+//  }
   
   public void shouldShowTable(boolean showPlot) {
     isPlotVisible = showPlot;

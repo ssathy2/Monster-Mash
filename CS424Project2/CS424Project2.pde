@@ -144,6 +144,9 @@ void setup(){
     // change these to match your screen size
     size(2479,700);
     scaleFactor = 2;
+
+//      size(1240, 350);
+//      scaleFactor = 1;
   }
 
   showTable = false;
@@ -186,10 +189,12 @@ void setup(){
   timelineWidth = (width / 2) - (20 * scaleFactor); 
   timelineHeight = height - (helpButtonHeight) - (10 * scaleFactor);
  
-  dataTableX = timelineX;
-  dataTableY = timelineY;
+  //dataTableX = timelineX;
+  //dataTableY = timelineY;
+  dataTableX = width/4 - 50;
+  dataTableY = timelineY + 50*scaleFactor;
   dataTableHeight =  30 * scaleFactor;
-  dataTableWidth = 100 * scaleFactor;
+  dataTableWidth = 200 * scaleFactor;
 
   removableCountriesBoxX = timelineX + timelineWidth + (10 * scaleFactor);
   removableCountriesBoxY = (height/3);
@@ -450,7 +455,7 @@ void initPiechart() {
 }
 
 void initDataTable() { 
-  dataTable = new Table(this, cp5, "slider2", dataTableWidth, dataTableHeight, (float)dataTableX, (float)dataTableY, 100.0, 100.0, font);
+  dataTable = new Table(this, cp5, "slider2", dataTableWidth, dataTableHeight, (float)dataTableX, (float)dataTableY, 100, 20, font);
   dataTable.shouldShowTable(false);
 } 
 
