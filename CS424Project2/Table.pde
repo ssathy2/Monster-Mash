@@ -2,14 +2,14 @@ import processing.core.*;
 import controlP5.*;
 
 /*
-  Utility class to draw a timeline at requested plot points
+  Utility class to draw a table at requested plot points
   - Color can be changed by setting the BG and FG colors
   - Years can be adjusted by setting year min and year max values
   - data is plotted by passing a floatable of data to class
   - pass in a set of colors to color multiple lines
  */
 
-class Timeline {
+class Table {
   
   PApplet parent;
   Range yearsSlider;
@@ -20,12 +20,13 @@ class Timeline {
   
   String rangeName;
   String title; 
-  
-  int timelineAbsX, timelineAbsY;
+   
   float plotX1, plotY1;
   float plotX2, plotY2;
  
-  int timelineHeight, timelineWidth;
+  float tableHeight, tableWidth, timelineWidth;
+  float xPos, yPos;
+  PFont font;
   
   RangeControlListener listener;
   
@@ -34,6 +35,7 @@ class Timeline {
   boolean showHorror = true;
   boolean showMusical = true;
   boolean showDrama = true;
+  
      
   // Data
   HashMap<Integer, Integer> comedyCount;
@@ -45,32 +47,33 @@ class Timeline {
   HashMap<String, HashMap<Integer, Integer>> cachedCountries;
   HashMap<String, HashMap<Integer, Integer>> cachedKeywordGenres;
   
-  boolean isDrawingCountryData;
-  
-  public Timeline(PApplet p, ControlP5 p5, int timelineX, int timelineY, int timelineWidthParam, int timelineHeightParam, String sliderName) {
+  public Table(PApplet p, ControlP5 p5, String sliderName, int timelineWidth, int timelineHeight, float xPos, float yPos, float tableWidth, float tableHeight, PFont font) {
+    this.xPos = xPos;
+    this.yPos = yPos;
+    this.tableWidth = tableWidth;
+    this.tableHeight = tableHeight;
+    this.font = font;
+    
+    
     // use this object to grab latest sliderYearMax and slideryearMin values
     listener = new RangeControlListener();
     
     parent = p;
-    timelineAbsX = timelineX;
-    timelineAbsY = timelineY;
-    plotX1 = (float)timelineX + (40 * scaleFactor);
-    plotY1 = (float)(timelineY + (40 * scaleFactor));
 
-    yearsSliderHandleSize = 10 * scaleFactor;
-    sliderHeight = 25 * scaleFactor;
     
-    timelineHeight = timelineHeightParam;
-    timelineWidth = timelineWidthParam;
-    plotX2 = (float)(plotX1 + timelineWidth - (40 * scaleFactor));
+    sliderHeight = 25 * scaleFactor;
+    sliderWidth = timelineWidth;
+    yearsSliderHandleSize = 10 * scaleFactor;
+    
+    sliderX = floor(plotX1);
+    sliderY = floor(plotY1) + timelineHeight - (55*scaleFactor);
+    
+    tableHeight = tableHeight;
+    tableWidth = tableWidth;
+    plotX2 = (float)(plotX1 + tableWidth);
     
     // the 10*scaleFactor is to fit in the years labels
-    plotY2 = (float)(plotY1 + timelineHeight) - sliderHeight - (70 * scaleFactor);
-      
-    sliderX = floor(plotX1);
-    sliderY = floor(plotY2) + (40 * scaleFactor);
-
-    sliderWidth = floor(plotX2) - floor(plotX1);
+    plotY2 = (float)(plotY1 + tableHeight) - sliderHeight - (60 * scaleFactor);
     
     rangeName = sliderName;
     
@@ -86,11 +89,8 @@ class Timeline {
                     // after the initialization we turn broadcast back on again
                     .setBroadcast(true)
                     .addListener(listener)
-                    .setColorBackground(#3E3E3E)
-                    .setColorForeground(#5F5F5F)
-                    .setColorActive(#9D9D9D)
                     ;
-      isDrawingCountryData = false;
+      title = "BLAH BLAH TEST TITLE";
       cachedCountries = new HashMap<String, HashMap<Integer, Integer>>();
       cachedKeywordGenres = new HashMap<String, HashMap<Integer, Integer>>();
       loadData();  
@@ -115,7 +115,7 @@ class Timeline {
                                                                      1890, 2012);  
     println("Keyword genre data loaded");
   } 
- 
+
   public void drawYearLabels() {
     // temp interval var
     int yearInterval = 10;
@@ -132,10 +132,10 @@ class Timeline {
       float x = map(years, listener.sliderYearsMin, listener.sliderYearsMax, plotX1, plotX2);
       if (years % yearInterval == 0) {
         text(years, x, plotY2 + (10 * scaleFactor));
-        line(x, plotY2, x, plotY2 + (10*scaleFactor));
+        //line(x, plotY2, x, plotY2 + (10*scaleFactor));
       }
       else if(years % minorYearInterval == 0) {
-        line(x, plotY2, x, plotY2 + (5*scaleFactor));
+        //line(x, plotY2, x, plotY2 + (5*scaleFactor));
       }
     }  
   }
@@ -150,19 +150,19 @@ class Timeline {
     stroke(#DFDFDF);
     strokeWeight(1);
     
-    for(int i = dataMin; i <= dataMax; i += dataInterval) {
+    for(int i = dataMin; i <= dataMax; i = i + dataInterval) {
       float yPos = map(i, dataMin, dataMax, plotY2, plotY1);
       if (i == dataMin) {
           textAlign(RIGHT, CENTER);                 // Align by the bottom
-          text(i, plotX1 - 3, yPos); 
+          //text(i, plotX1 - 3, yPos); 
       } else if (i == dataMax) {
           textAlign(RIGHT, CENTER);            // Align by the top
-          text(i, plotX1 - 3, yPos); 
+          //text(i, plotX1 - 3, yPos); 
       } else {
           textAlign(RIGHT, CENTER);            // Align by the top
-          text(i, plotX1 - 3, yPos);     
+          //text(i, plotX1 - 3, yPos);     
       }
-      line(plotX1, yPos, plotX2, yPos); 
+      //line(plotX1, yPos, plotX2, yPos); 
     }
   }
   
@@ -170,24 +170,23 @@ class Timeline {
     // TODO: Need some way to draw the lines for the time-line
     //       Need some color coding scheme...use line-color array
     if(selectedCountries.isEmpty()) {
-      isDrawingCountryData = false;
       if(!selectedGenres.isEmpty() && !selectedKeywords.isEmpty()) {
           drawGenreKeywordLine();
       }
       else {
         stroke(#EDFC47);
-        strokeWeight(3);
+        strokeWeight(2);
         drawDataLine();    
       }
     }
     else {
-      isDrawingCountryData = true;
       drawCountryLines();
     }
   }
   
   public void drawGenreKeywordLine() {
-     // this is suicidal...each query execution takes like mf'in 3ish seconds, gots to figure out a way to cache these damn things
+     // this is suicidal...each query execution takes like mf'in 3ish seconds
+     // gots to figure out a way to cache these damn things
      if(isGenreKeywordChanged) {
        println("Getting keyword/genres...");
        genreKeyword = moviesDB.getMovieCount(Arrays.copyOf(selectedGenres.toArray(), selectedGenres.toArray().length, String[].class),
@@ -196,9 +195,8 @@ class Timeline {
        println("Keyword/genres loaded");
        isGenreKeywordChanged = false;
      }
-     int maxVal = getMaxValue(genreKeyword);
-     drawColoredLine(#E31A45, genreKeyword, maxVal);
-     drawUnitLabels(0, maxVal, 5);
+     drawColoredLine(#E31A45, genreKeyword);
+     drawUnitLabels(0, getMaxValue(genreKeyword), 5);
   }
   
   private int getMaxValue(HashMap<Integer, Integer> m) {
@@ -212,64 +210,98 @@ class Timeline {
   }
   
   public void drawCountryLines() {
-    int maxVal = 0;
     for(int i = 0; i < selectedCountries.size(); i++) {
       String country = selectedCountries.get(i);
       if(cachedCountries.containsKey(country)) {
         println("Found movies cached for: " + country);
-        if(maxVal < getMaxValue(cachedCountries.get(country))){
-          maxVal = getMaxValue(cachedCountries.get(country));
-        }
+        drawColoredLine(lineColors[i], cachedCountries.get(country));   
       } 
       else {
         println("Getting movies for " + country + "...");
         HashMap<Integer, Integer> moviesCountry = moviesDB.getNumberMoviesPerYear(Arrays.copyOf(selectedGenres.toArray(), selectedGenres.toArray().length, String[].class), country, 1890, 2012);
         println("Movies loaded for " + country);
         cachedCountries.put(country, moviesCountry);
-        if(maxVal < getMaxValue(moviesCountry)){
-          maxVal = getMaxValue(moviesCountry);
-        }
+        drawColoredLine(lineColors[i], moviesCountry);
       }  
-    }
-   drawColoredLines(maxVal);
-   drawUnitLabels(0, maxVal, maxVal/10); 
+    } 
   }
   
-  // perf wise this is not good but I think we can safely ignore that
-  private void drawColoredLines(int maxVal) {
-    for(int i = 0; i < selectedCountries.size(); i++) {
-      String country = selectedCountries.get(i);
-      drawColoredLine(lineColors[i], cachedCountries.get(country), maxVal);
-    }
-  }
-  
-  
-  public void drawColoredLine(int lineColor, HashMap<Integer, Integer> movies, int maxVal) {
+  public void drawColoredLine(int lineColor, HashMap<Integer, Integer> movies) {
     stroke(lineColor);
-    strokeWeight(3);
+    strokeWeight(2);
     int[] displayArr = new int[(2012-1890)];
     
     for(int j = 1890; j <= 2012; j++) {
       if(j == 2012) {
-          displayArr[j - 1890 - 1] = movies.get(j);  
-        
+        if(movies.get(j) == null){
+          displayArr[j-1890-1] += 0;
+        }else { 
+          displayArr[j - 1890 - 1] += movies.get(j);  
+        }
       } else {
-          displayArr[j - 1890] = movies.get(j);
+        if(movies.get(j) == null) {
+          displayArr[j-1890] += 0;
+        } else {
+          displayArr[j - 1890] += movies.get(j);
+        }
       }
     }
     
     int yearsMin = listener.sliderYearsMin;
     int yearsMax = listener.sliderYearsMax;
+    int maxVal = getMaxValue(displayArr);
     
-    noFill();
-    beginShape();
+    HashMap<Integer, Integer> sums = new HashMap();
+    Integer intValue = 0;
+    Integer intYear = 1890;
+    
+    //Fill hash map for table
     for (int i = yearsMin; i <= yearsMax ; i++) {
       float value = (float) ((i == 2012)?displayArr[i - 1890 - 1]:displayArr[i - 1890]);
-      float x = map(i, yearsMin, yearsMax, plotX1, plotX2);
-      float y = map(value, 0, maxVal, plotY2, plotY1);
-      vertex(x,y);
+      intValue = (int)Math.round(value);
+      intYear = i;
+      sums.put(intYear,intValue);
+      //println(i + ":" + value);  
     }
-    endShape();
+    
+    Integer tmpYear = 0;
+    Integer tmpSum = 0;
+    
+    float x1 = xPos;
+    float x2 = xPos + tableWidth;
+    float y1 = yPos;
+    float y2 = yPos + tableHeight;
+    
+    //Now draw table
+     for(int i = 1890; i <=2012; i = i+10){
+        try{
+          tmpYear = i;
+          tmpSum = sums.get(tmpYear);
+          
+          parent.stroke(#DFDFDF);
+          parent.fill(backgroundColor);
+          parent.rectMode(parent.CORNERS);
+          
+          parent.rect(x1, y1, x2, y2);
+          parent.rect(x1+tableWidth, y1, x2+tableWidth, y2);
+          
+          parent.textFont(font);
+          parent.fill(#DFDFDF);
+          parent.textAlign(parent.CENTER, parent.CENTER);
+          
+          parent.text(tmpYear, x1 + (tableWidth/4), y1+(tableHeight/2));
+          parent.text(tmpSum, (x1+tableWidth)+(tableWidth/4), y1+(tableHeight/2));
+          
+          x1 = xPos;
+          x2 = x1 + tableWidth;
+          y1 = y1 + tableHeight;
+          y2 = y1 + tableHeight;
+        }
+        catch (Exception e) {
+        }
+        
+      }
+
   }
   
   private void drawDataLine() {
@@ -339,17 +371,60 @@ class Timeline {
     int yearsMax = listener.sliderYearsMax;
     int maxVal = getMaxValue(displayArr);
     
-    noFill();
-    beginShape();
+    HashMap<Integer, Integer> sums = new HashMap();
+    Integer intValue = 0;
+    Integer intYear = 1890;
+
+//Fill hash map for table
     for (int i = yearsMin; i <= yearsMax ; i++) {
       float value = (float) ((i == 2012)?displayArr[i - 1890 - 1]:displayArr[i - 1890]);
-      float x = map(i, yearsMin, yearsMax, plotX1, plotX2);
-      float y = map(value, 0, maxVal, plotY2, plotY1);
-      vertex(x,y);
+      intValue = (int)Math.round(value);
+      intYear = i;
+      sums.put(intYear,intValue);
+      //println(i + ":" + value);    
     }
-    endShape();
+    
+    Integer tmpYear = 0;
+    Integer tmpSum = 0;
+    
+    float x1 = xPos;
+    float x2 = xPos + tableWidth;
+    float y1 = yPos;
+    float y2 = yPos + tableHeight;
+    
+    //Now draw table
+     for(int i = 1890; i <=2012; i = i+10){
+        try{
+          tmpYear = i;
+          tmpSum = sums.get(tmpYear);
+          
+          parent.stroke(#DFDFDF);
+          parent.fill(backgroundColor);
+          parent.rectMode(parent.CORNERS);
+          
+          parent.rect(x1, y1, x2, y2);
+          parent.rect(x1+tableWidth, y1, x2+tableWidth, y2);
+          
+          parent.textFont(font);
+          parent.fill(#DFDFDF);
+          parent.textAlign(parent.CENTER, parent.CENTER);
+          
+          parent.text(tmpYear, x1 + (tableWidth/4), y1+(tableHeight/2));
+          parent.text(tmpSum, (x1+tableWidth)+(tableWidth/4), y1+(tableHeight/2));
+          
+          x1 = xPos;
+          x2 = x1 + tableWidth;
+          y1 = y1 + tableHeight;
+          y2 = y1 + tableHeight;
+        }
+        catch (Exception e) {
+        }
+        
+      }
+      
 
-    drawUnitLabels(0, maxVal, maxVal/10);
+
+    //drawUnitLabels(0, maxVal, 1000);
   }
   
   public int getMaxValue(int[] numbers){  
@@ -363,69 +438,28 @@ class Timeline {
   }  
   
   public void draw() {
-    yearsSlider.hide();
     if(isPlotVisible) {
-      // TODO: Should timeline have same bg color as regular app?
+            // TODO: Should timeline have same bg color as regular app?
       parent.fill(backgroundColor);
       parent.rectMode(CORNERS);
       parent.noStroke();
       parent.rect(plotX1, plotY1, plotX2, plotY2);
-      yearsSlider.show();
-      drawYearLabels();
-      drawAxisUnitLabels();
+
+      //drawYearLabels();
       drawLines();
       drawTitle();
     }
   }
   
-  public void drawAxisUnitLabels() {
-    parent.fill(#DFDFDF);
-    parent.textAlign(CENTER);
-    parent.text("Movie\ncount",timelineX ,(plotY2 + plotY1)/2);
-    parent.textAlign(CENTER);
-    parent.text("Year", (plotX1 + plotX2)/2, plotY2 + (30*scaleFactor));
-  }
-  
   public void drawTitle() {
-    if(isDrawingCountryData) { 
-      title = "Movie count for the selected countries: ";
-      for(int i = 0; i < selectedCountries.size(); i++) {
-        if(i == selectedCountries.size() - 1) {
-          title += selectedCountries.get(i); 
-        }else {
-          title += selectedCountries.get(i) + ", ";  
-        }
-      }
-    } else {
-      title = "Movie count for the following genres: ";
-      for(int i = 0; i < selectedGenres.size(); i++) {
-        if(i == selectedGenres.size() - 1 && selectedKeywords.size() > 0) {
-          title += selectedGenres.get(i) + "  and the following monsters: " ; 
-        }else if(i == selectedGenres.size() - 1){
-          title += selectedGenres.get(i);
-        }else {
-          title += selectedGenres.get(i) + ", ";  
-        }
-      }
-      if(selectedKeywords.size() > 0) {
-        for(int i = 0; i < selectedKeywords.size(); i++) {
-          if(i == selectedKeywords.size() - 1) {
-            title += selectedKeywords.get(i); 
-          }else {
-            title += selectedKeywords.get(i) + ", ";  
-          }      
-        }
-      }
-    }
-    
     fill(#DFDFDF);
     textSize(8 * scaleFactor);
     textAlign(CENTER);
     
-    text(title, (plotX1 + timelineWidth / 2), (plotY1 - ((40 * scaleFactor) / 2)));
+    text(title, (plotX1 + tableWidth / 2), (plotY1 - ((40 * scaleFactor) / 2)));
   }
   
-  public void shouldShowPlot(boolean showPlot) {
+  public void shouldShowTable(boolean showPlot) {
     isPlotVisible = showPlot;
   }
   

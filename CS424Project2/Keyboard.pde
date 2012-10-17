@@ -115,5 +115,8 @@ public class Keyboard {
   public void setCollapsed() {
     isVisible = false;
   }
+  public void clear() {
+    input = "";  
+  }
 }
 

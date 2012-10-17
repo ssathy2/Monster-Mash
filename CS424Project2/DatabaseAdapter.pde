@@ -39,15 +39,15 @@ class DatabaseAdapter {
     String keyString = "";
     int n = 1;
     for (String s : keys) {
-        if (n==1) {
-          keyString = "'[[:<:]]"+s.toLowerCase()+"[[:>:]]";
+      if (n==1) {
+          keyString = "keywordMovie like '%"+s.toLowerCase()+"%'";
           n++;
         }
         else {
-          keyString = keyString + "|" + "[[:<:]]"+s.toLowerCase()+"[[:>:]]";
+          keyString = keyString + " or " + "keywordMovie like '%"+s.toLowerCase()+"%'";
         }
      }
-    return (keyString + "'"); 
+    return keyString; 
   }
   
   public HashMap<Integer, Integer> getMovieCount(String[] genreList, String[] keywords, int yearStart, int yearEnd) {
@@ -57,7 +57,8 @@ class DatabaseAdapter {
       String keywordString = generateKeywordString(keywords);
     
       if(msql.connect()) {
-        msql.query("select yearMovie,count(*) from movie where idMovie in (select idMovie from genre where genreMovie in ("+genreString+") and idMovie in (select idMovie from keyword where keywordMovie REGEXP "+keywordString+") and yearMovie between "+yearStart+" and "+yearEnd+") group by yearMovie");
+        msql.query("select yearMovie,count(*) from movie where idMovie in (select idMovie from genre where genreMovie in ("+genreString+") and idMovie in (select idMovie from keyword where ("+keywordString+")) and yearMovie between "+yearStart+" and "+yearEnd+") group by yearMovie");
+        
         while(msql.next()) {
           retMap.put(msql.getInt("movie.yearMovie"), msql.getInt("count(*)")); 
         }  
@@ -87,7 +88,7 @@ class DatabaseAdapter {
       msql.query("select Distinct country.countryMovie from country");
       int i = 0;
       while (msql.next()) {
-        ret[i] = msql.getString("country.countryMovie");
+        ret[i] = msql.getString("countryMovie");
         i++; 
       }
     }  
@@ -99,9 +100,7 @@ class DatabaseAdapter {
     int j = 0;
     if(msql.connect()) {
       String genreString = generateGenreQueryString(genre);
-      
-      msql.query("select yearMovie from movie where idMovie in (select idMovie from country where idMovie in (select idMovie from genre where genreMovie in ("+genreString+"))and countryMovie = '"+country+"') and yearMovie between "+yearStart+" and "+yearEnd+"");
-      
+      msql.query("select yearMovie from movie where idMovie in (select idMovie from country where idMovie in (select idMovie from genre where genreMovie in ("+genreString+"))and countryMovie = '"+country+"') and yearMovie between "+yearStart+" and "+yearEnd+" order by yearMovie");      
       // kinda hacky and ovekill and slow but yea  
       while(msql.next()) {
         int yearRes = msql.getInt("yearMovie");
@@ -109,7 +108,7 @@ class DatabaseAdapter {
           retMap.put(yearRes, 0); 
         }
         else {
-          retMap.put(yearRes, retMap.get(yearRes) + 1);
+          retMap.put(yearRes, (retMap.get(yearRes) + 1));
         }
       }  
     }
@@ -120,7 +119,7 @@ class DatabaseAdapter {
     HashMap<Integer, Integer> retMap = new HashMap<Integer, Integer>();
     int j = 0;
     if(msql.connect()) {
-      msql.query("select movie.yearMovie from movie,genre where movie.idMovie = genre.idMovie and movie.idMovie in (select idMovie from genre where genreMovie = '"+genre+"' ) and movie.yearMovie between '"+yearStart+"' and '"+yearEnd+"' order by genre.idMovie limit 0,1000000");
+      msql.query("select movie.yearMovie from movie,genre where movie.idMovie = genre.idMovie and movie.idMovie in (select idMovie from genre where genreMovie = '"+genre+"' ) and movie.yearMovie between '"+yearStart+"' and '"+yearEnd+"' order by genre.idMovie");
            
       // kinda hacky and ovekill and slow but yea  
       while(msql.next()) {
@@ -138,7 +137,7 @@ class DatabaseAdapter {
   
   // helper method that iterates over the map and puts any zeros where there's nulls
   private HashMap<Integer, Integer> cleanedUpMap(HashMap<Integer, Integer> p){
-    for(int i = 1890; i < 2012; i++){
+    for(int i = 1890; i <= 2012; i++){
       if(p.get(i) == null) {
         p.put(i, 0);
       } 

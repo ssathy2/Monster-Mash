@@ -8,11 +8,7 @@ class MovieInformationBox {
   // position, dimension related  
   int boxXPos, boxYPos;
   int boxHeight, boxWidth;
-  
-  // closebutton position, dimension
-  int closeButtonX, closeButtonY;
-  int closeButtonHeight, closeButtonWidth;
-  
+
   // strings for year, movie, cert, budget, and monsters
   String yearText;
   String movieText;
@@ -22,7 +18,6 @@ class MovieInformationBox {
   
   boolean showBox;
   
-  Bang closeButton;
   PApplet parentApplet;
   
   public MovieInformationBox(PApplet p, ControlP5 p5, int x, int y, int h, int w) {
@@ -32,19 +27,6 @@ class MovieInformationBox {
     boxYPos = y;
     boxHeight = h;
     boxWidth = w;
-    
-    // position closeButton near the bottom left corner 
-    closeButtonHeight = 10 * scaleFactor;
-    closeButtonWidth = closeButtonWidth;
-    closeButtonX = boxXPos + (2 * scaleFactor);
-    closeButtonY = (boxYPos + boxHeight) - closeButtonHeight - (2 * scaleFactor);
-    
-    closeButton = p5.addBang("closeButton")
-                    .setPosition(closeButtonX, closeButtonY)
-                    .setSize(closeButtonWidth, closeButtonHeight)
-                    .setTriggerEvent(Bang.RELEASE)
-                    .setLabel("")
-                    ;
   }
   
   public void draw() {
@@ -52,6 +34,7 @@ class MovieInformationBox {
       // Draw a border...seems hacky -> need to do research on drawing a border a different way
       parentApplet.rectMode(CORNERS);
       parentApplet.stroke(#00FFFE);
+      parentApplet.fill(#232323);
       parentApplet.rect(boxXPos, boxYPos, boxXPos + boxWidth, boxYPos + boxHeight, 7);
    
       drawMovieText();
@@ -61,14 +44,16 @@ class MovieInformationBox {
   }
   
   public void drawMovieText() {
+    fill(#DFDFDF);
     parentApplet.textFont(font);
-    parentApplet.textSize(10 * scaleFactor);
-    parentApplet.text(movieText, boxXPos/2, 5 * scaleFactor);
-    println(movieText);
+    parentApplet.textAlign(CENTER);
+    parentApplet.text(movieText, (boxXPos + (80 * scaleFactor)), boxYPos + (20 * scaleFactor));
   }
   
   public void drawYearText() {
-    
+    parentApplet.textFont(font);
+    parentApplet.textAlign(CENTER);
+    parentApplet.text(yearText, (boxXPos + (80 * scaleFactor)), boxYPos + (55 * scaleFactor));
   }
   
   public void drawCertificationText() {
@@ -80,7 +65,9 @@ class MovieInformationBox {
   }
   
   public void drawMonstersText() {
-    
+    parentApplet.textFont(font);
+    parentApplet.textAlign(CENTER);
+    parentApplet.text(monstersText, (boxXPos + (80 * scaleFactor)), boxYPos + (90 * scaleFactor));
   }
   
   public void updateInformationBox(String name) {
@@ -93,7 +80,13 @@ class MovieInformationBox {
          m += monsters.get(i); 
       }
       else {
-         m += monsters.get(i) + ", ";
+         if(monsters.size() % 3 == 0) {
+           
+         }
+         else {
+                m += monsters.get(i) + ", ";
+        
+         }
       }
     }
     monstersText = m;

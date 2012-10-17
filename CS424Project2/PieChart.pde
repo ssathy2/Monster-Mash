@@ -28,6 +28,7 @@ class PieChart {
   } 
   
   public void calculateAngles() {
+    angles.clear();
     int sum = 0;
     int i = 0;
     for(i = 0; i < vals.length; i++) {
@@ -39,10 +40,15 @@ class PieChart {
     } 
   }
   
+  public void updateValues(int[] paramVals) {
+    vals = paramVals;
+  }
+  
   public void draw() {
+    calculateAngles();
     for (int i = 0; i < angles.size(); i++) {
       parent.fill(angles.get(i) * 3.0);
-      parent.arc(pieChartWidth/2, pieChartHeight/2, diameter, diameter, lastAngle, lastAngle+(parent.radians(angles.get(i))));
+      parent.arc(xPos + (pieChartWidth/2), yPos + (pieChartHeight/2), diameter, diameter, lastAngle, lastAngle+(parent.radians(angles.get(i))));
       lastAngle += radians(angles.get(i));
     }
   }

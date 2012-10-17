@@ -44,6 +44,10 @@ public class TouchButton {
     isVisible = false;
   }
   
+  public void setText(String t) {
+    content = t;
+  }
+  
   public void draw(){
     if(isVisible){
       parent.fill(backgroundColor);
@@ -53,7 +57,7 @@ public class TouchButton {
       parent.textFont(font);
       parent.fill(textColor);
       parent.textAlign(parent.CENTER, parent.CENTER);
-      parent.text(content, xPosition+(Width/2), (float) (yPosition+(Height/2)+2));
+      parent.text(content, xPosition+(Width/2), (float) (yPosition+(Height/2)));
     }    
   }
   

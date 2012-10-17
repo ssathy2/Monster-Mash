@@ -100,13 +100,16 @@ class SearchableListbox {
       if(theEvent.isFrom(name)) {
          currentIndex = (int)theEvent.group().value();
          currentSelectedItem = listboxItems[currentIndex];
-         inputBox.setText(listboxItems[currentIndex]);
-         movieInformationBox.updateInformationBox(currentSelectedItem);
+
          // draw removable countries box
          // This is fucking hacky as hell but for some reason, putting this call inside the draw function of the main app is
          // adding it twice...For now this is meh but due to time constraints it works and yea, throw it in and worry later      
          if(secret) {
-           removableCountriesBox.addItemToRemovableListBox(listboxItems[currentIndex]);
+           removableCountriesBox.addItemToRemovableListBox(currentSelectedItem);
+         }
+         else {
+           inputBox.setText(currentSelectedItem);
+           movieInformationBox.updateInformationBox(currentSelectedItem);
          }
       }
     }
