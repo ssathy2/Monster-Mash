@@ -104,8 +104,8 @@ int scaleFactor;
   - decide whether we're displaying on the wall
   - decide whether we're running on a mbp (can't do P3D and 8160 by 2304 for some reason)
 */
-boolean displayOnWall = false;
-boolean displayMBP = true;
+boolean displayOnWall = true;
+boolean displayMBP = false;
 
 int textColor = color(#DFDFDF);
 int backgroundColor;
