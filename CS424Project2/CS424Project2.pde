@@ -237,13 +237,13 @@ void setup(){
   
   helpBoxHeight = movieInformationBoxHeight;
   helpBoxWidth = moviesBoxWidth;
-  helpBoxX = movieInformationBoxX + movieInformationBoxWidth + (20*scaleFactor);
-  helpBoxY = movieInformationBoxY;
+  helpBoxX = width - helpBoxWidth;
+  helpBoxY = movieInformationBoxY + (45 * scaleFactor);
 
   creditsBoxHeight = movieInformationBoxHeight;
   creditsBoxWidth = moviesBoxWidth;
-  creditsBoxX = movieInformationBoxX + movieInformationBoxWidth + (20*scaleFactor);
-  creditsBoxY = movieInformationBoxY + (10 * scaleFactor);
+  creditsBoxX = helpBoxX;
+  creditsBoxY = movieInformationBoxY + (35 * scaleFactor);
   
   selectedGenres = new ArrayList<String>();
   selectedKeywords = new ArrayList<String>();
@@ -313,7 +313,7 @@ void draw() {
     //pChart.updateValues();
     //pChart.draw();
   }  
-  
+
   helpBox.draw();
   creditsBox.draw();
 
@@ -332,10 +332,17 @@ void draw() {
   onScreenKeyboard.draw();
   
   if(countriesBox.isInFocus() || moviesBox.isInFocus()) {
+    if(countriesBox.isInFocus()) {
+      moviesBox.inputBox.setFocus(false);    
+    }
+    else {
+      countriesBox.inputBox.setFocus(false); 
+    }
     onScreenKeyboard.setVisible();  
   }
   else {
-    onScreenKeyboard.setCollapsed();  
+    onScreenKeyboard.setCollapsed(); 
+    onScreenKeyboard.clear(); 
   }
      
   // draw genre, countries, and monsters string labels
@@ -446,7 +453,7 @@ void initDataViewButton(PFont font) {
 
 void initMovieInformationBox() {
   movieInformationBox = new MovieInformationBox(this, cp5, movieInformationBoxX, movieInformationBoxY, movieInformationBoxHeight, movieInformationBoxWidth);
-  movieInformationBox.updateInformationBox("Scary Movie (1991)");
+  movieInformationBox.updateInformationBox("Shaun of the Dead (2004)");
 }
 
 void initPiechart() {
@@ -498,8 +505,7 @@ void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
   noFill();
   stroke(255,0,0);
   ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
-  cp5.getPointer().set(floor(xPos), floor(yPos));
-  
+
   if(helpButton.Clicked(xPos, yPos)) {
     helpBox.setVisible();
     creditsBox.setCollapsed();  
@@ -516,19 +522,19 @@ void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
     else {
       showTable = true;
       dataViewButton.setText("Show Timeline");    
-    }
-    
+    }   
   } 
-  else if(onScreenKeyboard.Clicked(xPos, yPos)) {
+  /*else if(onScreenKeyboard.Clicked(xPos, yPos)) {
      if(countriesBox.isInFocus()) {
        countriesBox.setText(onScreenKeyboard.getInput());  
-       onScreenKeyboard.clear();
+       countriesBox.inputBox.setFocus(true);
      } else if(moviesBox.isInFocus()) {
        moviesBox.setText(onScreenKeyboard.getInput());
-       onScreenKeyboard.clear();
+       moviesBox.inputBox.setFocus(true);
      }
-  }
+  }*/
   
+  cp5.getPointer().set(floor(xPos), floor(yPos));    
   if(displayOnWall) {
     cp5.getPointer().pressed();
   }
@@ -544,12 +550,19 @@ void touchMove(int ID, float xPos, float yPos, float xWidth, float yWidth){
 }// touchMove
 
 void touchUp(int ID, float xPos, float yPos, float xWidth, float yWidth){
-  //println("touchUp(): Called from Proj class");
+  println("X: " + xPos + " Y: " + yPos);
   noFill();
   stroke(0,0,255);
   ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
+  
+  if(countriesBox.isInFocus()) {
+    countriesBox.inputBox.keepFocus(true);
+  }else if(moviesBox.isInFocus()) {
+    countriesBox.setText(onScreenKeyboard.getInput());  
+    moviesBox.inputBox.keepFocus(true);
+  }
+  
   cp5.getPointer().set(floor(xPos), floor(yPos));
-
   if(displayOnWall) {
     cp5.getPointer().released();
   }
