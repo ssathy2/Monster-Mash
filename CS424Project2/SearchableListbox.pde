@@ -106,6 +106,7 @@ class SearchableListbox {
          // adding it twice...For now this is meh but due to time constraints it works and yea, throw it in and worry later      
          if(secret) {
            removableCountriesBox.addItemToRemovableListBox(currentSelectedItem);
+           keywordCheckbox.deactivateAll();
          }
          else {
            inputBox.setText(currentSelectedItem);

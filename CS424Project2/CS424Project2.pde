@@ -193,8 +193,8 @@ void setup(){
   //dataTableY = timelineY;
   dataTableX = width/4 - 50;
   dataTableY = timelineY + 50*scaleFactor;
-  dataTableHeight =  30 * scaleFactor;
-  dataTableWidth = 200 * scaleFactor;
+  dataTableHeight =  20 * scaleFactor;
+  dataTableWidth = 100 * scaleFactor;
 
   removableCountriesBoxX = timelineX + timelineWidth + (10 * scaleFactor);
   removableCountriesBoxY = (height/3);
@@ -333,11 +333,12 @@ void draw() {
   
   if(countriesBox.isInFocus() || moviesBox.isInFocus()) {
     if(countriesBox.isInFocus()) {
-      moviesBox.inputBox.setFocus(false);    
+
     }
-    else {
-      countriesBox.inputBox.setFocus(false); 
+    else if(countriesBox.isInFocus()) {
+  
     }
+    
     onScreenKeyboard.setVisible();  
   }
   else {
@@ -462,7 +463,7 @@ void initPiechart() {
 }
 
 void initDataTable() { 
-  dataTable = new Table(this, cp5, "slider2", dataTableWidth, dataTableHeight, (float)dataTableX, (float)dataTableY, 100, 20, font);
+  dataTable = new Table(this, cp5, "slider2", dataTableWidth, dataTableHeight, (float)dataTableX, (float)dataTableY, dataTableWidth, dataTableHeight, font);
   dataTable.shouldShowTable(false);
 } 
 
@@ -524,15 +525,15 @@ void touchDown(int ID, float xPos, float yPos, float xWidth, float yWidth){
       dataViewButton.setText("Show Timeline");    
     }   
   } 
-  /*else if(onScreenKeyboard.Clicked(xPos, yPos)) {
+  else if(onScreenKeyboard.Clicked(xPos, yPos)) {
      if(countriesBox.isInFocus()) {
        countriesBox.setText(onScreenKeyboard.getInput());  
-       countriesBox.inputBox.setFocus(true);
+       countriesBox.inputBox.keepFocus(true);
      } else if(moviesBox.isInFocus()) {
        moviesBox.setText(onScreenKeyboard.getInput());
-       moviesBox.inputBox.setFocus(true);
+       moviesBox.inputBox.keepFocus(true);
      }
-  }*/
+  }
   
   cp5.getPointer().set(floor(xPos), floor(yPos));    
   if(displayOnWall) {
@@ -556,10 +557,9 @@ void touchUp(int ID, float xPos, float yPos, float xWidth, float yWidth){
   ellipse( xPos, yPos, xWidth * 2, yWidth * 2 );
   
   if(countriesBox.isInFocus()) {
-    countriesBox.inputBox.keepFocus(true);
+    countriesBox.inputBox.setFocus(true);
   }else if(moviesBox.isInFocus()) {
-    countriesBox.setText(onScreenKeyboard.getInput());  
-    moviesBox.inputBox.keepFocus(true);
+    moviesBox.inputBox.setFocus(true);
   }
   
   cp5.getPointer().set(floor(xPos), floor(yPos));
